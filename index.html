@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas Memory Stress Test</title>
+    <style>
+        body { font-family: monospace; background: #111; color: #0f0; padding: 20px; }
+        #log { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h2>Browser Canvas Allocation Test</h2>
+    <div id="log">Initializing...</div>
+
+    <script>
+        const logDiv = document.getElementById('log');
+        const canvases = [];
+        
+        // Target ~500MB per canvas to hit browser limits quickly
+        // 10000 x 10000 x 4 bytes = 400MB
+        const WIDTH = 10000;
+        const HEIGHT = 10000;
+        const BYTES_PER_CANVAS = (WIDTH * HEIGHT * 4) / (1024 * 1024);
+
+        function log(msg) {
+            logDiv.textContent += msg + '\n';
+            console.log(msg);
+        }
+
+        function stressTest() {
+            let count = 1;
+            
+            function allocate() {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = WIDTH;
+                    canvas.height = HEIGHT;
+                    
+                    // Force the browser to actually allocate the backing store
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+                    
+                    canvases.push(canvas);
+                    
+                    const totalMB = (count * BYTES_PER_CANVAS).toFixed(2);
+                    log(`[SUCCESS] Canvas ${count} allocated. Total memory: ~${totalMB} MB`);
+                    
+                    count++;
+                    // Use setTimeout to prevent immediate synchronous lockup, 
+                    // allowing the browser to process the allocation and update the UI
+                    setTimeout(allocate, 100); 
+                    
+                } catch (e) {
+                    log(`[FAILURE] Allocation failed at Canvas ${count}.`);
+                    log(`Error: ${e.message}`);
+                    log('This indicates the browser has hit its per-tab memory limit or maximum canvas dimension limit.');
+                }
+            }
+            
+            log(`Attempting to allocate ${WIDTH}x${HEIGHT} canvases (~${BYTES_PER_CANVAS} MB each)...`);
+            allocate();
+        }
+
+        // Start the test
+        stressTest();
+    </script>
+</body>
+</html>
