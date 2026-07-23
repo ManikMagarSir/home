@@ -1,69 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Canvas Memory Stress Test</title>
-    <style>
-        body { font-family: monospace; background: #111; color: #0f0; padding: 20px; }
-        #log { white-space: pre-wrap; }
-    </style>
+<meta charset="UTF-8">
+<title>Canvas Stress — htop</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#0a0a0a; color:#aaa; font-family:'Courier New',monospace;
+    display:flex; height:100vh; overflow:hidden; font-size:13px;
+  }
+
+  /* ── LEFT: TERMINAL ── */
+  #terminal {
+    flex:1; display:flex; flex-direction:column;
+    border-right:2px solid #222; min-width:0;
+  }
+  #term-header {
+    background:#1a1a1a; padding:6px 12px; color:#555;
+    border-bottom:1px solid #333; font-size:11px;
+    display:flex; justify-content:space-between;
+  }
+  #term-header span.dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; }
+  #log {
+    flex:1; overflow-y:auto; padding:10px 12px;
+    line-height:1.6; font-size:12px;
+  }
+  #log::-webkit-scrollbar { width:6px; }
+  #log::-webkit-scrollbar-thumb { background:#333; }
+  .g { color:#0f0; } .r { color:#f44; } .y { color:#ff0; }
+  .c { color:#0ff; } .d { color:#555; } .w { color:#fff; }
+
+  /* ── RIGHT: HTOP ── */
+  #htop {
+    flex:1; display:flex; flex-direction:column;
+    padding:8px 12px; overflow:hidden; min-width:0;
+    background:#0d0d0d;
+  }
+  #htop-title {
+    text-align:center; color:#0ff; font-weight:bold;
+    margin-bottom:8px; font-size:14px; letter-spacing:2px;
+  }
+
+  /* bars */
+  .bar-row { display:flex; align-items:center; margin-bottom:3px; font-size:11px; }
+  .bar-label { width:50px; color:#0ff; flex-shrink:0; }
+  .bar-track {
+    flex:1; height:14px; background:#1a1a1a; border-radius:2px;
+    overflow:hidden; display:flex; position:relative;
+  }
+  .bar-seg { height:100%; transition:width .3s; }
+  .bar-val { width:110px; text-align:right; color:#888; flex-shrink:0; padding-left:6px; font-size:10px; }
+
+  .seg-green  { background:#0a0; }
+  .seg-yellow { background:#aa0; }
+  .seg-red    { background:#a00; }
+  .seg-blue   { background:#06a; }
+  .seg-cyan   { background:#0aa; }
+
+  .section-label {
+    color:#0ff; font-size:11px; margin:10px 0 4px 0;
+    border-bottom:1px solid #222; padding-bottom:2px;
+  }
+
+  /* process table */
+  #proc-header {
+    display:grid; grid-template-columns:50px 60px 70px 70px 1fr;
+    color:#0ff; font-size:11px; padding:3px 0;
+    border-bottom:1px solid #333; font-weight:bold;
+  }
+  #proc-list {
+    flex:1; overflow-y:auto; font-size:11px;
+  }
+  #proc-list::-webkit-scrollbar { width:5px; }
+  #proc-list::-webkit-scrollbar-thumb { background:#333; }
+  .proc-row {
+    display:grid; grid-template-columns:50px 60px 70px 70px 1fr;
+    padding:1px 0; border-bottom:1px solid #111;
+  }
+  .proc-row:nth-child(even) { background:#111; }
+  .proc-row .pid { color:#0f0; }
+  .proc-row .user { color:#0aa; }
+  .proc-row .mem { color:#ff0; }
+  .proc-row .virt { color:#888; }
+  .proc-row .cmd { color:#ccc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* footer */
+  #htop-footer {
+    margin-top:6px; padding-top:6px; border-top:1px solid #333;
+    display:flex; justify-content:space-between; font-size:10px; color:#555;
+  }
+  #htop-footer .key { color:#0ff; }
+
+  /* summary box */
+  #summary {
+    background:#111; border:1px solid #333; border-radius:3px;
+    padding:8px 10px; margin-top:8px; font-size:12px; line-height:1.7;
+  }
+  #summary .big { font-size:22px; color:#0f0; font-weight:bold; }
+</style>
 </head>
 <body>
-    <h2>Browser Canvas Allocation Test</h2>
-    <div id="log">Initializing...</div>
 
-    <script>
-        const logDiv = document.getElementById('log');
-        const canvases = [];
-        
-        // Target ~500MB per canvas to hit browser limits quickly
-        // 10000 x 10000 x 4 bytes = 400MB
-        const WIDTH = 10000;
-        const HEIGHT = 10000;
-        const BYTES_PER_CANVAS = (WIDTH * HEIGHT * 4) / (1024 * 1024);
+<!-- LEFT: TERMINAL -->
+<div id="terminal">
+  <div id="term-header">
+    <div>
+      <span class="dot" style="background:#f44"></span>
+      <span class="dot" style="background:#ff0"></span>
+      <span class="dot" style="background:#0f0"></span>
+      &nbsp;canvas-stress — bash
+    </div>
+    <div id="term-status">RUNNING</div>
+  </div>
+  <div id="log"></div>
+</div>
 
-        function log(msg) {
-            logDiv.textContent += msg + '\n';
-            console.log(msg);
-        }
+<!-- RIGHT: HTOP -->
+<div id="htop">
+  <div id="htop-title">Canvas Memory Monitor</div>
 
-        function stressTest() {
-            let count = 1;
-            
-            function allocate() {
-                try {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = WIDTH;
-                    canvas.height = HEIGHT;
-                    
-                    // Force the browser to actually allocate the backing store
-                    const ctx = canvas.getContext('2d');
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-                    
-                    canvases.push(canvas);
-                    
-                    const totalMB = (count * BYTES_PER_CANVAS).toFixed(2);
-                    log(`[SUCCESS] Canvas ${count} allocated. Total memory: ~${totalMB} MB`);
-                    
-                    count++;
-                    // Use setTimeout to prevent immediate synchronous lockup, 
-                    // allowing the browser to process the allocation and update the UI
-                    setTimeout(allocate, 100); 
-                    
-                } catch (e) {
-                    log(`[FAILURE] Allocation failed at Canvas ${count}.`);
-                    log(`Error: ${e.message}`);
-                    log('This indicates the browser has hit its per-tab memory limit or maximum canvas dimension limit.');
-                }
-            }
-            
-            log(`Attempting to allocate ${WIDTH}x${HEIGHT} canvases (~${BYTES_PER_CANVAS} MB each)...`);
-            allocate();
-        }
+  <div class="bar-row">
+    <span class="bar-label">Mem</span>
+    <div class="bar-track">
+      <div class="bar-seg seg-green"  id="memGreen"  style="width:0%"></div>
+      <div class="bar-seg seg-yellow" id="memYellow" style="width:0%"></div>
+      <div class="bar-seg seg-red"    id="memRed"    style="width:0%"></div>
+    </div>
+    <span class="bar-val" id="memVal">0M / 0M</span>
+  </div>
 
-        // Start the test
-        stressTest();
-    </script>
+  <div class="bar-row">
+    <span class="bar-label">Swap</span>
+    <div class="bar-track">
+      <div class="bar-seg seg-blue" id="swapBar" style="width:0%"></div>
+    </div>
+    <span class="bar-val" id="swapVal">0M / 0M</span>
+  </div>
+
+  <div class="bar-row">
+    <span class="bar-label">GPU</span>
+    <div class="bar-track">
+      <div class="bar-seg seg-cyan" id="gpuBar" style="width:0%"></div>
+    </div>
+    <span class="bar-val" id="gpuVal">N/A</span>
+  </div>
+
+  <div class="section-label">Tasks: <span id="taskCount">0</span>, <span id="threadCount">0</span> thr, <span id="runningCount">1</span> running</div>
+
+  <div id="proc-header">
+    <span>PID</span><span>USER</span><span>MEM%</span><span>VIRT</span><span>COMMAND</span>
+  </div>
+  <div id="proc-list"></div>
+
+  <div id="summary">
+    Canvases alive: <span class="big" id="sumCount">0</span><br>
+    Total alloc: <span id="sumMem" class="c">0 MB</span> &nbsp;|&nbsp;
+    Per canvas: <span id="sumPer" class="y">0 MB</span><br>
+    Rate: <span id="sumRate" class="g">0/s</span> &nbsp;|&nbsp;
+    Uptime: <span id="sumTime" class="w">0s</span><br>
+    Status: <span id="sumStatus" class="g">ALLOCATING</span>
+  </div>
+
+  <div id="htop-footer">
+    <span><span class="key">F1</span> Help</span>
+    <span><span class="key">F2</span> Setup</span>
+    <span><span class="key">F9</span> Kill</span>
+    <span><span class="key">F10</span> Quit</span>
+    <span id="clock"></span>
+  </div>
+</div>
+
+<script>
+const logEl  = document.getElementById('log');
+const procEl = document.getElementById('proc-list');
+const canvases = [];
+let count = 0, running = true, startTime = Date.now();
+
+const W = 8000, H = 8000;
+const MB_PER = (W * H * 4) / 1048576;
+const DELAY = 80;
+
+// ── terminal log ──
+function log(msg, cls) {
+  const s = document.createElement('span');
+  s.className = cls || '';
+  s.textContent = msg + '\n';
+  logEl.appendChild(s);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// ── htop bars ──
+function updateBars() {
+  const totalMB = count * MB_PER;
+  // fake a 8GB ceiling for the bar visual
+  const ceiling = 8192;
+  const pct = Math.min((totalMB / ceiling) * 100, 100);
+
+  const g = Math.min(pct, 60);
+  const y = Math.min(Math.max(pct - 60, 0), 25);
+  const r = Math.max(pct - 85, 0);
+
+  document.getElementById('memGreen').style.width  = g + '%';
+  document.getElementById('memYellow').style.width = y + '%';
+  document.getElementById('memRed').style.width    = r + '%';
+  document.getElementById('memVal').textContent =
+    `${totalMB >= 1024 ? (totalMB/1024).toFixed(1)+'G' : totalMB.toFixed(0)+'M'} / 8.0G`;
+
+  // swap: pretend it kicks in after 4GB
+  const swapPct = Math.max(0, Math.min(((totalMB - 4096) / 4096) * 100, 100));
+  document.getElementById('swapBar').style.width = swapPct + '%';
+  document.getElementById('swapVal').textContent =
+    `${(swapPct/100*4096).toFixed(0)}M / 4.0G`;
+
+  // gpu: proportional
+  const gpuPct = Math.min(pct * 0.7, 100);
+  document.getElementById('gpuBar').style.width = gpuPct + '%';
+  document.getElementById('gpuVal').textContent =
+    `${(gpuPct/100*2048).toFixed(0)}M / 2.0G`;
+
+  document.getElementById('taskCount').textContent = count + 3;
+  document.getElementById('threadCount').textContent = (count + 3) * 4;
+}
+
+// ── process row ──
+function addProcRow(n) {
+  const row = document.createElement('div');
+  row.className = 'proc-row';
+  const virt = (MB_PER * n).toFixed(0);
+  const memPct = ((MB_PER / 8192) * 100).toFixed(1);
+  row.innerHTML =
+    `<span class="pid">${1000 + n}</span>` +
+    `<span class="user">root</span>` +
+    `<span class="mem">${memPct}</span>` +
+    `<span class="virt">${virt}M</span>` +
+    `<span class="cmd">canvas_${n} [${W}x${H}] rgba8888</span>`;
+  procEl.appendChild(row);
+  procEl.scrollTop = procEl.scrollHeight;
+}
+
+// ── summary ──
+function updateSummary() {
+  const totalMB = count * MB_PER;
+  const elapsed = ((Date.now() - startTime) / 1000);
+  document.getElementById('sumCount').textContent = count;
+  document.getElementById('sumMem').textContent =
+    totalMB >= 1024 ? (totalMB/1024).toFixed(2) + ' GB' : totalMB.toFixed(1) + ' MB';
+  document.getElementById('sumPer').textContent = MB_PER.toFixed(1) + ' MB';
+  document.getElementById('sumRate').textContent =
+    elapsed > 0 ? (count / elapsed).toFixed(1) + '/s' : '0/s';
+  document.getElementById('sumTime').textContent = elapsed.toFixed(1) + 's';
+}
+
+// ── clock ──
+setInterval(() => {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString();
+}, 1000);
+
+// ── main loop ──
+function allocate() {
+  if (!running) return;
+  try {
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const ctx = c.getContext('2d');
+    if (!ctx) throw new Error('getContext returned null');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, W, H);
+
+    canvases.push(c);
+    count++;
+
+    log(`[  OK  ] canvas_${count}  ${W}x${H}  +${MB_PER.toFixed(0)}MB  total=${(count*MB_PER).toFixed(0)}MB`, 'g');
+    addProcRow(count);
+    updateBars();
+    updateSummary();
+
+    setTimeout(allocate, DELAY);
+  } catch (e) {
+    running = false;
+    log('', '');
+    log(`[ FAIL ] canvas_${count + 1} — ${e.message}`, 'r');
+    log(`[ DONE ] Browser limit reached.`, 'y');
+    log(`[ DONE ] Total canvases: ${count}`, 'y');
+    log(`[ DONE ] Total memory:   ${(count * MB_PER).toFixed(1)} MB`, 'y');
+    log(`[ DONE ] Time elapsed:   ${((Date.now()-startTime)/1000).toFixed(1)}s`, 'y');
+    log('', '');
+    log(`Process finished. Tab will likely become unresponsive.`, 'd');
+
+    document.getElementById('term-status').textContent = 'FINISHED';
+    document.getElementById('term-status').style.color = '#f44';
+    document.getElementById('sumStatus').textContent = 'LIMIT REACHED';
+    document.getElementById('sumStatus').className = 'r';
+    document.getElementById('runningCount').textContent = '0';
+    updateSummary();
+  }
+}
+
+// ── boot ──
+log(`canvas-stress v1.0 — ${new Date().toISOString()}`, 'c');
+log(`config: ${W}x${H} | ${MB_PER.toFixed(1)} MB/canvas | delay=${DELAY}ms`, 'd');
+log(`target: allocate until browser kills us`, 'd');
+log(`${'─'.repeat(52)}`, 'd');
+log('', '');
+
+setTimeout(allocate, 300);
+</script>
 </body>
 </html>
