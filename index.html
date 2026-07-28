@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#080b10">
+<title>Manik Magar</title>
+<meta name="description" content="Manik Magar — MERN fullstack developer & Cyber Security student, University of Wolverhampton. A spatial, scroll-navigated portfolio.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><path d='M24 3 42 13.5v21L24 45 6 34.5v-21Z' fill='none' stroke='%2338bdf8' stroke-width='3'/><path d='M14 31V17l10 9 10-9v14' fill='none' stroke='%23f59e0b' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --disp:'Bricolage Grotesque',system-ui,sans-serif;
+  --bodyf:'Public Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:#080b10;color:#e8eef4;font-family:var(--bodyf);-webkit-user-select:none;user-select:none;overscroll-behavior:none}
+::selection{background:#38bdf8;color:#04121c}
+.mono{font-family:var(--mono)}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+
+#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+#cglow{position:fixed;left:0;top:0;width:340px;height:340px;border-radius:50%;pointer-events:none;z-index:6;
+  background:radial-gradient(circle,rgba(56,189,248,.15),rgba(56,189,248,.05) 40%,transparent 70%);will-change:transform}
+
+#vp{position:fixed;inset:0;cursor:grab;touch-action:none;z-index:1}
+body.dragging #vp{cursor:grabbing}
+#world{position:absolute;left:0;top:0;width:5200px;height:3600px;transform-origin:0 0;z-index:1;will-change:transform;
+  background-image:radial-gradient(rgba(255,255,255,.05) 1.3px,transparent 1.3px);
+  background-size:36px 36px}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:5;background:radial-gradient(ellipse at center,transparent 55%,rgba(3,6,10,.72))}
+
+.zone{position:absolute;z-index:0;border:1.5px dashed color-mix(in srgb,var(--zc) 30%,transparent);border-radius:26px;
+  background:color-mix(in srgb,var(--zc) 3%,transparent);pointer-events:none}
+.glow{position:absolute;border-radius:50%;pointer-events:none;z-index:0;animation:breathe 9s ease-in-out infinite var(--bd,0s)}
+@keyframes breathe{0%,100%{opacity:.72}50%{opacity:1}}
+.orbit{position:absolute;border:1px dashed rgba(127,216,201,.2);border-radius:50%;animation:spin 80s linear infinite;pointer-events:none;z-index:0;will-change:transform}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.clabel{position:absolute;z-index:2;pointer-events:none;animation:float 7s ease-in-out infinite var(--fd,0s);will-change:transform}
+.clabel .ck{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--lc);margin-bottom:6px}
+.clabel b{display:block;font-family:var(--disp);font-weight:800;font-size:52px;line-height:.95;letter-spacing:-.02em;color:#fff;transition:text-shadow .5s}
+.clabel .crate{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:#5f7488;margin-top:10px}
+.clabel .ck::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lc);margin-right:9px;box-shadow:0 0 12px var(--lc);animation:pulse 2s infinite}
+.clabel.on b{text-shadow:0 0 34px rgba(255,255,255,.4),0 0 80px var(--lc)}
+@keyframes pulse{50%{opacity:.3}}
+@keyframes float{0%,100%{transform:translateY(-6px)}50%{transform:translateY(7px)}}
+.decor{position:absolute;z-index:1;font-family:var(--mono);color:#3a4b5c;pointer-events:none;animation:float 8s ease-in-out infinite var(--fd,0s)}
+
+.node{position:absolute;z-index:3;cursor:grab}
+.node:active{cursor:grabbing}
+.card{border-radius:16px;position:relative;overflow:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .3s,border-color .3s}
+.node:hover .card{transform:translateY(-5px) scale(1.013)}
+
+.t-dark{background:linear-gradient(165deg,#131d2a,#0e1621);border:1px solid #243649;color:#e8eef4;box-shadow:0 22px 55px rgba(0,0,0,.5)}
+.t-dark::before{content:'';position:absolute;inset:0;background:radial-gradient(140% 90% at 50% -10%,color-mix(in srgb,var(--acc) 13%,transparent),transparent 60%);pointer-events:none}
+.node:hover .t-dark{border-color:color-mix(in srgb,var(--acc) 60%,#243649);box-shadow:0 34px 80px rgba(0,0,0,.65),0 0 0 1px color-mix(in srgb,var(--acc) 35%,transparent)}
+.pcard{display:flex;flex-direction:column}
+.pcard.feat{flex-direction:row;min-height:400px}
+.part{position:relative;display:grid;place-items:center;padding:24px;min-height:175px;border-bottom:1px solid #223349;
+  background:radial-gradient(120% 100% at 50% 0%,color-mix(in srgb,var(--acc) 12%,transparent),transparent 62%),#0d151f}
+.feat .part{width:45%;border-bottom:0;border-right:1px solid #223349;padding:0}
+.part>svg{width:min(80%,240px);height:auto;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.node:hover .part>svg{transform:scale(1.06) translateY(-3px)}
+.feat .part canvas{position:absolute;inset:0;width:100%;height:100%}
+.plabel{position:absolute;left:16px;bottom:12px;font-size:9px;letter-spacing:.22em;color:var(--acc);display:flex;gap:7px;align-items:center;z-index:2}
+.plabel i{width:6px;height:6px;border-radius:50%;background:var(--acc);animation:pulse 1.6s infinite}
+.pbody{padding:22px 24px;display:flex;flex-direction:column;gap:11px;position:relative;z-index:2;flex:1}
+.ptop{display:flex;justify-content:space-between;align-items:center;font-size:9.5px;letter-spacing:.18em;color:#7d93a4}
+.pcat{color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 45%,transparent);padding:4px 10px;border-radius:999px}
+.pcard h3{font-family:var(--disp);font-weight:800;font-size:23px;letter-spacing:-.01em;color:#fff}
+.feat h3{font-size:30px}
+.pcard p{color:#a9bcc9;font-size:13.5px;line-height:1.68}
+.ptags{font-size:10px;letter-spacing:.12em;color:#7d93a4}
+.plinks{display:flex;gap:18px;margin-top:auto;padding-top:8px}
+.plinks a{font-family:var(--mono);font-size:11px;letter-spacing:.15em;color:var(--acc);text-decoration:none;display:inline-flex;gap:6px;align-items:center;font-weight:500}
+.plinks a svg{width:11px;height:11px;transition:transform .2s}
+.plinks a:hover svg{transform:translate(2px,-2px)}
+.led{animation:lblink 1.8s infinite}.led.d1{animation-delay:.5s}.led.d2{animation-delay:1s}
+@keyframes lblink{0%,100%{opacity:1}50%{opacity:.25}}
+
+.t-light{background:#f8fafb;border:1px solid #dde5eb;border-top:3px solid var(--acc);color:#101820;box-shadow:0 18px 44px rgba(6,14,22,.4);padding:22px 24px}
+.node:hover .t-light{box-shadow:0 30px 66px rgba(6,14,22,.5);transform:translateY(-5px) scale(1.013)}
+.sh{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.sh svg{width:21px;height:21px;color:var(--acc)}
+.sh h4{font-family:var(--disp);font-weight:700;font-size:17px}
+.sh .cnt{margin-left:auto;font-size:10px;letter-spacing:.16em;color:#8595a3}
+.sk{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:8px;transition:background .2s,transform .2s}
+.sk:hover{background:color-mix(in srgb,var(--acc) 10%,white);transform:translateX(4px)}
+.sk svg{width:18px;height:18px;color:var(--acc);flex:0 0 auto}
+.sk span{font-size:13.5px;font-weight:500;color:#3d4c59}
+.dots{margin-left:auto;display:flex;gap:5px}
+.dots i{width:7px;height:7px;border-radius:50%;border:1.5px solid #cdd8e0}
+.dots i.on{background:var(--acc);border-color:var(--acc)}
+
+.t-red{background:linear-gradient(165deg,#241a1c,#1b1214);border:1px solid #3a2428;color:#f0e4e6;box-shadow:0 22px 55px rgba(0,0,0,.5);padding:26px 28px}
+.t-red::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--acc),transparent)}
+.node:hover .t-red{border-color:color-mix(in srgb,var(--acc) 55%,#3a2428);box-shadow:0 34px 78px rgba(0,0,0,.65)}
+.sc-head{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+.sc-head svg{width:26px;height:26px;color:var(--acc)}
+.sc-head .warn{margin-left:auto;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;color:var(--acc);border:1px solid color-mix(in srgb,var(--acc) 45%,transparent);padding:4px 10px;border-radius:999px}
+.t-red h3{font-family:var(--disp);font-weight:800;font-size:21px;color:#fff;margin-bottom:11px}
+.t-red p{color:#c4adb1;font-size:13.5px;line-height:1.68}
+.defense{margin-top:15px;padding:12px 15px;background:rgba(45,212,191,.07);border-left:3px solid #2dd4bf;border-radius:0 8px 8px 0;font-size:12.5px;color:#9fe0d3;line-height:1.6}
+.defense b{color:#2dd4bf;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;display:block;margin-bottom:4px}
+.sc-tags{margin-top:15px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:#8a7176}
+.t-red.note{display:flex;gap:14px;align-items:flex-start;background:rgba(251,146,60,.06);border:1px solid rgba(251,146,60,.4);padding:20px 22px}
+.t-red.note svg{width:20px;height:20px;color:#fb923c;flex:0 0 auto;margin-top:2px}
+.t-red.note p{color:#e8c9a8}
+
+.t-teal{background:linear-gradient(160deg,#0e4a41,#0a352f);border:1px solid #1a5c51;color:#eaf6f3;box-shadow:0 26px 66px rgba(0,0,0,.55);padding:30px 32px}
+.node:hover .t-teal{border-color:#2a8a7a;box-shadow:0 38px 90px rgba(0,0,0,.65)}
+.t-teal .ck{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:#f5c66a}
+.t-teal h3{font-family:var(--disp);font-weight:800;font-size:34px;line-height:1.02;color:#fff;margin:14px 0 14px;letter-spacing:-.02em}
+.t-teal .sub{color:#bfe3dc;font-size:14px;line-height:1.7;margin-bottom:20px}
+.crow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 15px;border-radius:9px;text-decoration:none;transition:background .2s;border-top:1px solid rgba(255,255,255,.08)}
+.crow:hover{background:rgba(255,255,255,.06)}
+.crow .lft{display:flex;flex-direction:column;gap:2px}
+.crow .k{font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:#6fa79c}
+.crow .v{font-size:14px;font-weight:600}
+.crow svg{width:15px;height:15px;color:#6fa79c;transition:transform .2s,color .2s}
+.crow:hover svg{transform:translate(2px,-2px);color:#f5c66a}
+.copy{font-family:var(--mono);font-size:10px;letter-spacing:.12em;background:rgba(245,158,11,.15);color:#f5c66a;border:1px solid rgba(245,158,11,.4);padding:6px 12px;border-radius:6px;transition:.2s}
+.copy:hover{background:#f59e0b;color:#1a1206}
+.avail{display:flex;align-items:center;gap:9px;margin-top:18px;font-size:12.5px;color:#d5efe9}
+.avail i{width:8px;height:8px;border-radius:50%;background:#2dd4bf;animation:pulse 2.2s infinite}
+
+.hub{background:linear-gradient(160deg,#11222e,#0c161f);border:1px solid #2c515b;padding:32px 34px;box-shadow:0 34px 90px rgba(0,0,0,.6);color:#eaf6f3}
+.node:hover .hub{border-color:#3d7683;box-shadow:0 44px 110px rgba(0,0,0,.7)}
+.hub-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.hub-top svg{width:44px;height:44px;color:#38bdf8}
+.pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:#7fd8c9;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.35);padding:7px 13px;border-radius:999px}
+.pill i{width:7px;height:7px;border-radius:50%;background:#d42d2d;animation:pulse 2.2s infinite}
+.hub h2{font-family:var(--disp);font-weight:800;font-size:46px;line-height:.98;letter-spacing:-.025em;color:#fff}
+.hub-role{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;color:#38bdf8;margin:16px 0 16px}
+.hub-lede{color:#b9cdd4;font-size:14.5px;line-height:1.72}
+.hub-lede b{color:#fff;font-weight:600}
+.hub-nav{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.hub-nav button{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:#cfe6e2;background:rgba(255,255,255,.04);border:1px solid #2c515b;padding:10px 16px;border-radius:8px;transition:.22s}
+.hub-nav button:hover{background:#38bdf8;color:#04121c;border-color:#38bdf8;transform:translateY(-2px)}
+.hub-note{margin-top:22px;font-size:10.5px;letter-spacing:.06em;color:#5f7488;line-height:1.6}
+
+#topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 20px;height:58px;background:rgba(8,11,16,.82);border-bottom:1px solid rgba(255,255,255,.07)}
+#topbar .brand{display:flex;align-items:center;gap:11px;font-family:var(--disp);font-weight:800;font-size:16px}
+#topbar .brand svg{width:24px;height:24px;color:#38bdf8}
+#topbar .brand small{font-family:var(--mono);font-weight:400;font-size:9.5px;letter-spacing:.2em;color:#5f7488}
+#dock{display:flex;gap:4px}
+#dock button{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:#8ba0b4;background:none;border:1px solid transparent;padding:8px 14px;border-radius:7px;transition:.2s}
+#dock button:hover{color:#fff;background:rgba(255,255,255,.06)}
+#dock button.act{color:#38bdf8;border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.08)}
+#readout{display:flex;align-items:center;gap:16px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#5f7488}
+#readout b{color:#cfe6e2;font-weight:400}
+#hint{position:fixed;left:20px;bottom:18px;z-index:20;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:#4d6072;line-height:1.9;pointer-events:none}
+#hint b{color:#7d93a4;font-weight:400}
+#ctrls{position:fixed;right:20px;bottom:20px;z-index:20;display:flex;flex-direction:column;gap:7px}
+#ctrls button{width:38px;height:38px;border-radius:9px;background:rgba(15,22,31,.9);border:1px solid rgba(255,255,255,.1);color:#cfe6e2;font-size:16px;display:grid;place-items:center;transition:.2s}
+#ctrls button:hover{background:#38bdf8;color:#04121c;border-color:#38bdf8}
+#ctrls button svg{width:16px;height:16px}
+
+#rail{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:15px;align-items:flex-end}
+#rail .rl{font-family:var(--mono);font-size:8.5px;letter-spacing:.32em;color:#4d6072;margin-bottom:2px}
+.rdot{display:flex;align-items:center;gap:11px;background:none;border:0;padding:2px 0}
+.rdot em{font-style:normal;font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:#5f7488;opacity:0;transform:translateX(7px);transition:.25s}
+.rdot i{width:8px;height:8px;border-radius:99px;background:#33465a;transition:.3s cubic-bezier(.2,.8,.2,1)}
+.rdot:hover em{opacity:.85;transform:none}
+.rdot:hover i{background:#7d93a4}
+.rdot.act i{height:28px;background:#38bdf8;box-shadow:0 0 14px rgba(56,189,248,.65)}
+.rdot.act em{opacity:1;transform:none;color:#cfe6e2}
+#rail.bump{animation:bump .3s}
+@keyframes bump{50%{transform:translateY(calc(-50% + 6px))}}
+
+#scrollcue{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:20;display:flex;flex-direction:column;align-items:center;gap:7px;color:#7d93a4;pointer-events:none;transition:opacity .6s}
+#scrollcue .sc-t{font-size:9.5px;letter-spacing:.3em}
+#scrollcue .sc-chev{display:flex;flex-direction:column;align-items:center;margin-top:-4px}
+#scrollcue .sc-chev svg{width:16px;height:16px;stroke:#38bdf8;animation:scdrop 1.7s ease-in-out infinite}
+#scrollcue .sc-chev svg:nth-child(2){margin-top:-7px;animation-delay:.18s}
+@keyframes scdrop{0%{opacity:0;transform:translateY(-4px)}45%{opacity:1}100%{opacity:0;transform:translateY(6px)}}
+body.toured #scrollcue{opacity:0}
+
+#mnav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:none;gap:3px;padding:8px 8px calc(9px + env(safe-area-inset-bottom));background:rgba(8,11,16,.95);border-top:1px solid rgba(255,255,255,.09)}
+#mnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 2px;border-radius:10px;background:none;border:0;color:#7d93a4;font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;transition:.2s}
+#mnav button svg{width:20px;height:20px}
+#mnav button.act{color:#38bdf8;background:rgba(56,189,248,.12)}
+#mzoom{position:fixed;right:14px;bottom:calc(86px + env(safe-area-inset-bottom));z-index:30;display:none;flex-direction:column;gap:9px}
+#mzoom button{width:46px;height:46px;border-radius:12px;background:rgba(15,22,31,.92);border:1px solid rgba(255,255,255,.12);color:#cfe6e2;font-size:20px;display:grid;place-items:center}
+#mzoom button:active{background:#38bdf8;color:#04121c}
+#coach{position:fixed;inset:0;z-index:60;display:none;place-items:center;background:rgba(4,7,11,.9);padding:26px;text-align:center}
+#coach .cbox{max-width:330px;width:100%}
+#coach .cico{width:64px;height:64px;margin:0 auto 18px;border-radius:16px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.35);display:grid;place-items:center;color:#38bdf8}
+#coach .cico svg{width:30px;height:30px}
+#coach h3{font-family:var(--disp);font-weight:800;font-size:24px;color:#fff}
+#coach .csub{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:#5f7488;margin:8px 0 24px}
+#coach .crow2{display:flex;align-items:center;gap:14px;text-align:left;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:13px 16px;margin-bottom:10px;font-size:13.5px;color:#c4d3de}
+#coach .crow2 svg{width:20px;height:20px;color:#38bdf8;flex:0 0 auto}
+#coach .crow2 b{color:#fff;font-weight:600}
+#coachok{width:100%;margin-top:16px;padding:15px;border-radius:11px;border:0;background:#38bdf8;color:#04121c;font-family:var(--mono);font-size:12px;letter-spacing:.16em;font-weight:500}
+
+@media(max-width:860px){
+  #dock,#rail{display:none}
+  #readout .coord{display:none}
+  .clabel b{font-size:38px}
+}
+@media(max-width:720px){
+  #topbar{padding:0 14px;height:52px}
+  #topbar .brand{font-size:14px}
+  #topbar .brand small{display:none}
+  #hint,#ctrls,#scrollcue{display:none}
+  #mnav{display:flex}
+  #mzoom{display:flex}
+  .pcard.feat{flex-direction:column;min-height:0}
+  .feat .part{width:100%;border-right:0;border-bottom:1px solid #223349;min-height:210px}
+  .feat h3{font-size:26px}
+  .clabel b{font-size:34px}
+  .hub{padding:26px 24px}
+  .hub h2{font-size:38px}
+  .t-teal h3{font-size:28px}
+  .decor{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .clabel,.decor,.plabel i,.pill i,.avail i,.led,.glow,.orbit,#scrollcue .sc-chev svg{animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<canvas id="fx"></canvas>
+<div id="cglow"></div>
+
+<div id="vp">
+  <div id="world">
+    <div class="zone" style="left:500px;top:400px;width:600px;height:590px;--zc:#7fd8c9"></div>
+    <div class="zone" style="left:2360px;top:260px;width:1350px;height:1130px;--zc:#38bdf8"></div>
+    <div class="zone" style="left:360px;top:2360px;width:850px;height:890px;--zc:#2dd4bf"></div>
+    <div class="zone" style="left:2360px;top:2360px;width:1020px;height:770px;--zc:#f87171"></div>
+    <div class="zone" style="left:4260px;top:2360px;width:550px;height:800px;--zc:#f5c66a"></div>
+
+    <div class="glow" style="left:2200px;top:200px;width:1500px;height:1200px;background:radial-gradient(circle,rgba(56,189,248,.13),transparent 68%);--bd:-2s"></div>
+    <div class="glow" style="left:-100px;top:2100px;width:1200px;height:1200px;background:radial-gradient(circle,rgba(14,122,109,.15),transparent 68%);--bd:-5s"></div>
+    <div class="glow" style="left:2200px;top:2200px;width:1300px;height:1000px;background:radial-gradient(circle,rgba(248,113,113,.11),transparent 68%);--bd:-3s"></div>
+    <div class="glow" style="left:4000px;top:2200px;width:1100px;height:1100px;background:radial-gradient(circle,rgba(245,158,11,.12),transparent 68%);--bd:-7s"></div>
+    <div class="glow" style="left:250px;top:150px;width:1000px;height:900px;background:radial-gradient(circle,rgba(127,216,201,.1),transparent 68%)"></div>
+
+    <div class="orbit" style="left:430px;top:325px;width:740px;height:740px"></div>
+    <div class="orbit" style="left:2500px;top:480px;width:1000px;height:1000px;animation-duration:110s;opacity:.6"></div>
+    <div class="orbit" style="left:4235px;top:2460px;width:600px;height:600px;animation-duration:90s"></div>
+
+    <div class="clabel" data-region="projects" style="left:2400px;top:300px;--lc:#38bdf8;--fd:-1s"><span class="ck">01 / REGION</span><b>Projects</b><span class="crate">7 BUILDS · 3 STACKS</span></div>
+    <div class="clabel" data-region="stack" style="left:400px;top:2400px;--lc:#2dd4bf;--fd:-3s"><span class="ck">02 / REGION</span><b>The Stack</b><span class="crate">16 TOOLS · 4 GROUPS</span></div>
+    <div class="clabel" data-region="security" style="left:2400px;top:2400px;--lc:#f87171;--fd:-2s"><span class="ck">03 / REGION</span><b>Security Lab</b><span class="crate">2 RESEARCH PoCs</span></div>
+    <div class="clabel" data-region="contact" style="left:4300px;top:2400px;--lc:#f5c66a;--fd:-4s"><span class="ck">04 / REGION</span><b>Contact</b><span class="crate">CHANNEL OPEN</span></div>
+
+    <div class="decor" style="left:1500px;top:700px;font-size:40px;--fd:-1s">{ }</div>
+    <div class="decor" style="left:3900px;top:900px;font-size:34px;--fd:-3s">&lt;/&gt;</div>
+    <div class="decor" style="left:1300px;top:1800px;font-size:12px;letter-spacing:.2em;--fd:-2s">52.5870°N · 2.1288°W</div>
+    <div class="decor" style="left:4900px;top:3300px;font-size:12px;letter-spacing:.2em;--fd:-5s">EST · 2026</div>
+    <div class="decor" style="left:1900px;top:2900px;font-size:30px;--fd:-4s">+</div>
+    <div class="decor" style="left:3800px;top:1800px;font-size:30px;--fd:-2.5s">+</div>
+
+    <div class="node" data-node data-color="#7fd8c9" style="left:560px;top:460px;width:480px">
+      <div class="card hub">
+        <div class="hub-top">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" stroke="currentColor" stroke-width="2.4"/><path d="M14 31V17l10 9 10-9v14" stroke="#f59e0b" stroke-width="2.6"/></svg>
+          <span class="pill"><i></i>!OPEN TO WORK</span>
+        </div>
+        <h2>Manik<br>Magar</h2>
+        <p class="hub-role">FULLSTACK DEVELOPER + CYBERSECURITY STUDENT</p>
+        <p class="hub-lede">I build management systems, a <b>3D open-world game</b>, and security-research tools — while studying <b>Cyber Security at the University of Wolverhampton</b>.</p>
+        <div class="hub-nav">
+          <button data-go="projects">PROJECTS →</button>
+          <button data-go="stack">STACK →</button>
+          <button data-go="security">SECURITY →</button>
+          <button data-go="contact">CONTACT →</button>
+        </div>
+        <p class="hub-note mono">// scroll travels the tour — drag to roam free, click any card to focus.</p>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#38bdf8" style="left:2400px;top:500px;width:660px;--acc:#38bdf8">
+      <div class="card t-dark pcard feat">
+        <div class="part"><canvas id="world3d"></canvas><span class="plabel mono"><i></i>LIVE WIREFRAME ENGINE</span></div>
+        <div class="pbody">
+          <div class="ptop mono"><span class="pcat">3D · WEBGL · FULLSTACK</span><span>P-01 / FEATURED</span></div>
+          <h3>Openworld — 3D Game</h3>
+          <p>A browser-based 3D open-world game: Three.js rendering on the client, a MERN backend for accounts, world state and scores. This card runs a miniature wireframe engine written from scratch for this site.</p>
+          <div class="ptags mono">MERN · THREE.JS · WEBGL · SOCKET.IO</div>
+          <div class="plinks">
+            <a href="../index1.html">SOURCE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg></a>
+            <a href="../index1.html">PLAY DEMO <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#2dd4bf" style="left:3110px;top:500px;width:410px;--acc:#2dd4bf">
+      <div class="card t-dark pcard">
+        <div class="part">
+          <svg viewBox="0 0 200 150" fill="none" aria-hidden="true">
+            <path d="M20 138h160" stroke="#223349" stroke-width="1.5"/>
+            <rect x="58" y="10" width="84" height="124" rx="3" stroke="#2dd4bf" stroke-width="2.4" fill="#0f2029"/>
+            <g stroke="#2dd4bf" stroke-width="1.6" opacity=".9"><rect x="66" y="20" width="68" height="13" rx="1.5"/><rect x="66" y="38" width="68" height="13" rx="1.5"/><rect x="66" y="56" width="68" height="13" rx="1.5"/><rect x="66" y="74" width="68" height="13" rx="1.5"/><rect x="66" y="92" width="68" height="13" rx="1.5"/><rect x="66" y="110" width="68" height="13" rx="1.5"/></g>
+            <g stroke="#2dd4bf" stroke-width="1.4" opacity=".3"><path d="M72 26.5h30M72 44.5h30M72 62.5h30M72 80.5h30M72 98.5h30M72 116.5h30"/></g>
+            <circle class="led" cx="128" cy="26.5" r="2.4" fill="#2dd4bf"/><circle class="led d1" cx="128" cy="44.5" r="2.4" fill="#f59e0b"/><circle class="led d2" cx="128" cy="62.5" r="2.4" fill="#2dd4bf"/><circle class="led" cx="128" cy="80.5" r="2.4" fill="#2dd4bf"/><circle class="led d1" cx="128" cy="98.5" r="2.4" fill="#f87171"/><circle class="led d2" cx="128" cy="116.5" r="2.4" fill="#2dd4bf"/>
+            <path d="M142 30c15 6 15 20 3 27M142 66c17 7 17 23 3 30" stroke="#f59e0b" stroke-width="1.6" opacity=".65"/>
+            <text x="58" y="147" fill="#5f7488" font-size="8" font-family="monospace">RACK-07 · 42U · 68%</text>
+          </svg>
+        </div>
+        <div class="pbody">
+          <div class="ptop mono"><span class="pcat">MERN · DASHBOARD</span><span>P-02</span></div>
+          <h3>Datacenter Rack Management</h3>
+          <p>Track racks, unit allocation, capacity utilisation and hardware assignments across a datacenter floor, with conflict checks on mount.</p>
+          <div class="ptags mono">MONGODB · EXPRESS · REACT · NODE</div>
+          <div class="plinks"><a href="../index1.html">SOURCE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg></a><a href="../index1.html">LIVE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#f59e0b" style="left:2400px;top:980px;width:390px;--acc:#f59e0b">
+      <div class="card t-dark pcard">
+        <div class="part">
+          <svg viewBox="0 0 200 150" fill="none" aria-hidden="true">
+            <path d="M20 132h160" stroke="#223349" stroke-width="1.5"/>
+            <rect x="52" y="36" width="96" height="96" stroke="#f59e0b" stroke-width="2.4" fill="#20180e"/>
+            <path d="M44 36h112" stroke="#f59e0b" stroke-width="2.4"/>
+            <g stroke="#f59e0b" stroke-width="1.6"><rect x="62" y="48" width="16" height="13"/><rect x="92" y="48" width="16" height="13" fill="#f59e0b" fill-opacity=".25"/><rect x="122" y="48" width="16" height="13"/><rect x="62" y="70" width="16" height="13" fill="#f59e0b" fill-opacity=".25"/><rect x="92" y="70" width="16" height="13"/><rect x="122" y="70" width="16" height="13" fill="#f59e0b" fill-opacity=".25"/></g>
+            <rect x="90" y="102" width="20" height="30" stroke="#f59e0b" stroke-width="2" fill="#2a1f10"/><circle cx="106" cy="118" r="1.7" fill="#f59e0b"/>
+            <rect x="74" y="22" width="52" height="11" rx="1" fill="#20180e" stroke="#f59e0b" stroke-width="1.6"/>
+            <text x="82" y="30.5" fill="#f59e0b" font-size="7.5" font-family="monospace" letter-spacing="1">HOSTEL</text>
+            <circle cx="163" cy="58" r="8" stroke="#f59e0b" stroke-width="2.2"/><path d="M163 66v15m0-5h6m-6 5h4" stroke="#f59e0b" stroke-width="2.2"/>
+          </svg>
+        </div>
+        <div class="pbody">
+          <div class="ptop mono"><span class="pcat">NODE.JS · SYSTEM</span><span>P-03</span></div>
+          <h3>Hostel Management</h3>
+          <p>Room allocation, resident records and fee tracking — a Node.js backend behind a fast, framework-free front end.</p>
+          <div class="ptags mono">HTML · CSS · JS · NODE.JS</div>
+          <div class="plinks"><a href="../index1.html">SOURCE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#fb7185" style="left:2830px;top:980px;width:390px;--acc:#fb7185">
+      <div class="card t-dark pcard">
+        <div class="part">
+          <svg viewBox="0 0 200 150" fill="none" aria-hidden="true">
+            <path d="M86 12 100 30M114 12 100 30" stroke="#fb7185" stroke-width="2"/>
+            <rect x="68" y="30" width="64" height="90" rx="6" stroke="#fb7185" stroke-width="2.4" fill="#221216"/>
+            <rect x="90" y="24" width="20" height="10" rx="2" fill="#fb7185"/>
+            <circle cx="100" cy="56" r="11" stroke="#fb7185" stroke-width="2"/>
+            <path d="M82 88c2-13 10-17 18-17s16 4 18 17" stroke="#fb7185" stroke-width="2"/>
+            <path d="M80 100h40M80 108h28" stroke="#fb7185" stroke-width="2" opacity=".5"/>
+            <circle cx="138" cy="112" r="12" fill="#0f2029" stroke="#2dd4bf" stroke-width="2"/>
+            <path d="m132 112 4 4 8-8" stroke="#2dd4bf" stroke-width="2.4"/>
+            <text x="66" y="140" fill="#5f7488" font-size="8" font-family="monospace">CHECK-IN 09:42 · GATE A</text>
+          </svg>
+        </div>
+        <div class="pbody">
+          <div class="ptop mono"><span class="pcat">PHP · SYSTEM</span><span>P-04</span></div>
+          <h3>Visitor Management</h3>
+          <p>Digital front-desk logbook: check-in/out timestamps, host assignment and a searchable daily log. Replaced paper.</p>
+          <div class="ptags mono">HTML · CSS · JS · PHP</div>
+          <div class="plinks"><a href="../index1.html">SOURCE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#a78bfa" style="left:3260px;top:980px;width:410px;--acc:#a78bfa">
+      <div class="card t-dark pcard">
+        <div class="part">
+          <svg viewBox="0 0 200 150" fill="none" aria-hidden="true">
+            <path d="M44 46 156 30l3 17-112 16Z" stroke="#a78bfa" stroke-width="2.4" fill="#191428"/>
+            <path d="M62 43l9-13M82 40l9-13M102 37l9-13M122 34l9-13M142 31l9-13" stroke="#a78bfa" stroke-width="3" opacity=".6"/>
+            <rect x="46" y="60" width="110" height="64" stroke="#a78bfa" stroke-width="2.4" fill="#150f22"/>
+            <circle cx="101" cy="92" r="18" stroke="#a78bfa" stroke-width="2"/>
+            <path d="M95 83v18l15-9Z" fill="#a78bfa"/>
+            <path d="M46 132h110" stroke="#a78bfa" stroke-width="1.6" opacity=".5"/>
+            <g fill="#a78bfa" opacity=".55"><rect x="52" y="136" width="9" height="6"/><rect x="70" y="136" width="9" height="6"/><rect x="88" y="136" width="9" height="6"/><rect x="106" y="136" width="9" height="6"/><rect x="124" y="136" width="9" height="6"/><rect x="142" y="136" width="9" height="6"/></g>
+            <path d="M168 24v10M163 29h10M36 96v8M32 100h8" stroke="#a78bfa" stroke-width="1.8" opacity=".6"/>
+          </svg>
+        </div>
+        <div class="pbody">
+          <div class="ptop mono"><span class="pcat">PHP · MYSQL · DATABASE</span><span>P-05</span></div>
+          <h3>Movie Database</h3>
+          <p>Full CRUD film catalogue with search and filtering — genres, directors and ratings properly normalised in MySQL.</p>
+          <div class="ptags mono">HTML · CSS · JS · PHP · MYSQL</div>
+          <div class="plinks"><a href="../index1.html">SOURCE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg></a><a href="../index1.html">LIVE <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#0e7a6d" style="left:400px;top:2600px;width:370px;--acc:#0e7a6d">
+      <div class="card t-light">
+        <div class="sh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="14" rx="1.5"/><path d="M8 21h8M12 18v3"/></svg><h4>Frontend</h4><span class="cnt mono">04</span></div>
+        <div class="sk"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="3" fill="currentColor"/><ellipse cx="22" cy="22" rx="17" ry="6.5" stroke="currentColor" stroke-width="2"/><ellipse cx="22" cy="22" rx="17" ry="6.5" stroke="currentColor" stroke-width="2" transform="rotate(60 22 22)"/><ellipse cx="22" cy="22" rx="17" ry="6.5" stroke="currentColor" stroke-width="2" transform="rotate(120 22 22)"/></svg><span>React</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 3 8v8l9 5 9-5V8Z"/><path d="M12 12 3 8m9 4 9-4m-9 4v9"/></svg><span>Three.js / WebGL</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 6-5 6 5 6M16 6l5 6-5 6M13 4l-2 16"/></svg><span>JavaScript (ES6+)</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 9v11"/></svg><span>HTML / CSS</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></div>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#d9820c" style="left:800px;top:2600px;width:370px;--acc:#d9820c">
+      <div class="card t-light">
+        <div class="sh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></svg><h4>Backend</h4><span class="cnt mono">04</span></div>
+        <div class="sk"><svg viewBox="0 0 44 44" fill="none"><path d="M22 4 37.5 13v18L22 40 6.5 31V13Z" stroke="currentColor" stroke-width="2.2"/><path d="M16 29V15l12 14V15" stroke="currentColor" stroke-width="2.4"/></svg><span>Node.js</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="19" stroke="currentColor" stroke-width="2" opacity=".5"/><path d="M12 14l9 8-9 8" stroke="currentColor" stroke-width="2.6"/><path d="M24 30h9" stroke="currentColor" stroke-width="2.6"/></svg><span>Express</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="12" rx="9" ry="5"/><path d="M7 5.5C5 7 4 9.5 4 12s1 5 3 6.5M17 5.5c2 1.5 3 4 3 6.5"/></svg><span>PHP</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="19" cy="17" r="2.4"/></svg><span>REST APIs</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#5b8db8" style="left:400px;top:2930px;width:370px;--acc:#5b8db8">
+      <div class="card t-light">
+        <div class="sh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5V18c0 1.7 3.6 3 8 3s8-1.3 8-3V5.5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg><h4>Data & Tooling</h4><span class="cnt mono">04</span></div>
+        <div class="sk"><svg viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="19" stroke="currentColor" stroke-width="2" opacity=".5"/><path d="M22 8c5.5 6.5 7 11 7 15 0 5.5-3.2 9-7 12-3.8-3-7-6.5-7-12 0-4 1.5-8.5 7-15Z" stroke="currentColor" stroke-width="2.2"/><path d="M22 15v18" stroke="currentColor" stroke-width="1.8"/></svg><span>MongoDB</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5V18c0 1.7 3.6 3 8 3s8-1.3 8-3V5.5"/><path d="M8 12h.01M8 16h.01"/></svg><span>MySQL</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><circle cx="18" cy="8" r="2.6"/><path d="M6 8.6v6.8M18 10.6c0 3.6-4.6 2.8-8.4 4.6"/></svg><span>Git / GitHub</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="m7 9 3 3-3 3M12 15h5"/></svg><span>Linux / shell</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#e05252" style="left:800px;top:2930px;width:370px;--acc:#e05252">
+      <div class="card t-light">
+        <div class="sh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 20 6v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V6Z"/><path d="m9 12 2 2 4-4.5"/></svg><h4>Security</h4><span class="cnt mono">04</span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18M7 6h.01M10 6h.01"/><path d="m9 13 2 2 4-4"/></svg><span>Browser security</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 20 6v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V6Z"/></svg><span>OWASP fundamentals</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h4l2-6 3 12 2.5-8L16 12h5"/></svg><span>Wireshark</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+        <div class="sk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/></svg><span>Nmap</span><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#f87171" style="left:2400px;top:2600px;width:450px;--acc:#f87171">
+      <div class="card t-red">
+        <div class="sc-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg>
+          <span class="warn">RESEARCH · PRIVATE</span>
+        </div>
+        <h3>Autofill Credential Harvest — PoC</h3>
+        <p>A browser extension showing how a malicious add-on can silently read credentials the instant a form autofills — no keylogger needed. Built to study the mechanics and the mitigations.</p>
+        <div class="defense"><b>DEFENCES STUDIED</b>Disabling autofill on untrusted sites, extension permission auditing, CSP, and why "all sites" access is a dangerous default.</div>
+        <p class="sc-tags">JAVASCRIPT · WEBEXTENSIONS API · DOM</p>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#fb923c" style="left:2890px;top:2600px;width:450px;--acc:#fb923c">
+      <div class="card t-red">
+        <div class="sc-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h13m0 0-5-5m5 5-5 5"/><path d="M20 4v16"/></svg>
+          <span class="warn">AWARENESS DEMO</span>
+        </div>
+        <h3>Navigation Redirect Hijack — PoC</h3>
+        <p>Type <span class="mono" style="color:#fb923c">facebook.com</span>, land on <span class="mono" style="color:#2dd4bf">manikmagar.com.np</span>. Intercepts navigation to show how trivially a redirect layer misdirects users — the core mechanic of phishing.</p>
+        <div class="defense"><b>DEFENCES STUDIED</b>URL verification habits, HSTS, certificate pinning, and how browsers sandbox webRequest access.</div>
+        <p class="sc-tags">WEBEXTENSIONS · WEBREQUEST / DECLARATIVENETREQUEST</p>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#fb923c" style="left:2400px;top:2980px;width:940px;--acc:#fb923c">
+      <div class="card t-red note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 2.5 20h19Z"/><path d="M12 10v4m0 3v.5"/></svg>
+        <p><strong>Ethics note.</strong> Both projects are educational proofs-of-concept from my Cyber Security studies at the University of Wolverhampton, developed and tested exclusively on systems I own. Neither is published, distributed, or intended for use against anyone else's machines or accounts.</p>
+      </div>
+    </div>
+
+    <div class="node" data-node data-color="#f5c66a" style="left:4300px;top:2600px;width:470px">
+      <div class="card t-teal">
+        <span class="ck">GET IN TOUCH</span>
+        <h3>I'll build something solid.</h3>
+        <p class="sub">Currently ! open to internships, placements and freelance work across the MERN and PHP stacks.</p>
+        <div class="crow">
+          <span class="lft"><span class="k">EMAIL</span><span class="v">contact@manikmagar.com.np</span></span>
+          <button class="copy" id="copymail">COPY</button>
+        </div>
+        <a class="crow" href="https://github.com/manikmagarsir" target="_blank">
+          <span class="lft"><span class="k">GITHUB</span><span class="v">github.com/manikmagarsir</span></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg>
+        </a>
+        <a class="crow" href="https://www.linkedin.com/in/manik-magar-b48287374/" target="_blank">
+          <span class="lft"><span class="k">LINKEDIN</span><span class="v">linkedin.com/in/manikmagar</span></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg>
+        </a>
+        <a class="crow" href="https://manikmagar.com.np" target="_blank">
+          <span class="lft"><span class="k">PERSONAL SITE</span><span class="v">manikmagar.com.np</span></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 5H5v14h14v-4"/><path d="M13 4h7v7"/><path d="M20 4 11 13"/></svg>
+        </a>
+        <p class="avail"><i></i>Currently available — replies within 24d</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="vignette"></div>
+
+<header id="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z" stroke="currentColor" stroke-width="2.6"/><path d="M14 31V17l10 9 10-9v14" stroke="#f59e0b" stroke-width="2.8"/></svg>
+    MANIK_MAGAR <small>+ imposter syndrome</small>
+  </div>
+  <nav id="dock">
+    <button data-go="home" class="act">HOME</button>
+    <button data-go="projects">PROJECTS</button>
+    <button data-go="stack">STACK</button>
+    <button data-go="security">SECURITY</button>
+    <button data-go="contact">CONTACT</button>
+  </nav>
+  <div id="readout">
+    <span class="coord">X <b id="rx">0</b> · Y <b id="ry">0</b></span>
+    <span>ZOOM <b id="rz">100%</b></span>
+  </div>
+</header>
+
+<div id="rail">
+  <span class="rl">TOUR</span>
+  <button class="rdot act" data-go="home"><em>HOME</em><i></i></button>
+  <button class="rdot" data-go="projects"><em>PROJECTS</em><i></i></button>
+  <button class="rdot" data-go="stack"><em>STACK</em><i></i></button>
+  <button class="rdot" data-go="security"><em>SECURITY</em><i></i></button>
+  <button class="rdot" data-go="contact"><em>CONTACT</em><i></i></button>
+</div>
+
+<div id="scrollcue" aria-hidden="true">
+  <span class="sc-t mono">SCROLL TO TRAVEL</span>
+  <span class="sc-chev">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg>
+  </span>
+</div>
+
+<div id="hint">
+  <b>SCROLL</b> TRAVEL REGIONS &nbsp;·&nbsp; <b>DRAG</b> ROAM FREE &nbsp;·&nbsp; <b>CTRL+SCROLL</b> ZOOM<br>
+  <b>CLICK CARD</b> FOCUS &nbsp;·&nbsp; <b>KEYS 1–5</b> JUMP &nbsp;·&nbsp; <b>0</b> FIT ALL
+</div>
+
+<div id="ctrls">
+  <button id="zin" title="Zoom in">+</button>
+  <button id="zout" title="Zoom out">−</button>
+  <button id="fit" title="Fit all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+  <button id="home" title="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 11 12 4l8 7M6 10v9h12v-9"/></svg></button>
+</div>
+
+<div id="mzoom">
+  <button id="mzin" aria-label="Zoom in">+</button>
+  <button id="mzout" aria-label="Zoom out">−</button>
+</div>
+<nav id="mnav">
+  <button data-go="home" class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 11 12 4l8 7M6 10v9h12v-9"/></svg>HOME</button>
+  <button data-go="projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>BUILDS</button>
+  <button data-go="stack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="m3 13 9 5 9-5"/></svg>STACK</button>
+  <button data-go="security"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3 20 6v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V6Z"/></svg>SECURITY</button>
+  <button data-go="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg>CONTACT</button>
+</nav>
+
+<div id="coach">
+  <div class="cbox">
+    <div class="cico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m15 9-2.5 5.5L9 15l1.5-4.5Z"/></svg></div>
+    <h3>Navigate the space</h3>
+    <p class="csub">THIS PORTFOLIO IS A MAP, NOT A PAGE</p>
+    <div class="crow2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 12H3m0 0 3-3m-3 3 3 3M16 12h5m0 0-3-3m3 3-3 3"/></svg><span><b>Drag</b> to pan around the world</span></div>
+    <div class="crow2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 3v4M15 3v4M9 21v-4M15 21v-4M3 9h4M3 15h4M21 9h-4M21 15h-4"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg><span><b>Pinch</b> to zoom in and out</span></div>
+    <div class="crow2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11V6a2 2 0 0 1 4 0v5"/><path d="M13 11V8.5a2 2 0 0 1 4 0V13a7 7 0 0 1-7 7 7 7 0 0 1-6-3.5L3 14a2 2 0 0 1 3.4-2L9 14"/></svg><span><b>Tap a card</b> to focus on it</span></div>
+    <div class="crow2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Use the <b>menu below</b> to jump regions</span></div>
+    <button id="coachok">GOT IT — EXPLORE</button>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const coarse=matchMedia('(pointer: coarse)').matches;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const DPR=Math.min(devicePixelRatio||1,2);
+
+const vp=$('#vp'), world=$('#world'), coach=$('#coach'), rail=$('#rail'), cglow=$('#cglow');
+let vw=innerWidth, vh=innerHeight;
+const isMobile=()=>vw<720;
+
+/* ---------- camera + tween ---------- */
+const cam={x:800,y:695}, tcam={x:800,y:695};
+let zoom=1, tzoom=1, tw=null;
+function easeInOutQuint(t){return t<.5?16*t*t*t*t*t:1-Math.pow(-2*t+2,5)/2;}
+let lastTf='';
+function apply(){
+  const tf=`translate(${vw/2}px,${vh/2}px) scale(${zoom}) translate(${-cam.x}px,${-cam.y}px)`;
+  if(tf===lastTf)return;
+  lastTf=tf;
+  world.style.transform=tf;
+}
+function flyTo(x,y,z,dur=1200,onDone){
+  tcam.x=x;tcam.y=y;tzoom=clamp(z,0.28,2.4);
+  if(reduced||dur<=1){cam.x=x;cam.y=y;zoom=tzoom;onDone&&onDone();return;}
+  tw={t0:performance.now(),dur,from:{x:cam.x,y:cam.y,z:zoom},to:{x,y,z:tzoom},onDone};
+}
+function zoomAt(sx,sy,nz){
+  nz=clamp(nz,0.28,2.4);
+  const wx=tcam.x+(sx-vw/2)/tzoom, wy=tcam.y+(sy-vh/2)/tzoom;
+  tzoom=nz;
+  tcam.x=wx-(sx-vw/2)/tzoom; tcam.y=wy-(sy-vh/2)/tzoom;
+  tw=null;
+}
+
+/* ---------- tour + framing ---------- */
+const TOUR=['home','projects','stack','security','contact'];
+let tourIdx=0;
+const REGIONS={
+  home:{x:500,y:400,w:600,h:590},
+  projects:{x:2360,y:260,w:1350,h:1130},
+  stack:{x:360,y:2360,w:850,h:890},
+  security:{x:2360,y:2360,w:1020,h:770},
+  contact:{x:4260,y:2360,w:550,h:800},
+};
+const RACC={home:'127,216,201',projects:'56,189,248',stack:'45,212,191',security:'248,113,113',contact:'245,198,106'};
+const VIEWS={};
+for(const k in REGIONS){const r=REGIONS[k];VIEWS[k]={x:r.x+r.w/2,y:r.y+r.h/2};}
+
+function go(name){
+  const r=REGIONS[name]; if(!r)return;
+  const mobile=isMobile();
+  const padX=mobile?26:60, top=mobile?70:80, bot=mobile?110:60;
+  const z=clamp(Math.min((vw-padX*2)/r.w,(vh-top-bot)/r.h),0.28,mobile?1.35:1.15);
+  const tx=r.x+r.w/2, ty=r.y+r.h/2+(mobile?10:0);
+  const dist=Math.hypot(tx-cam.x,ty-cam.y);
+  const dur=reduced?1:clamp(dist*0.55,800,1700);
+  flyTo(tx,ty,z,dur,()=>addWave(tx,ty,RACC[name]||'127,216,201'));
+  setAct(name);
+  const i=TOUR.indexOf(name); if(i>-1)tourIdx=i;
+}
+function setAct(name){
+  $$('#dock button').forEach(b=>b.classList.toggle('act',b.dataset.go===name));
+  $$('#mnav button').forEach(b=>b.classList.toggle('act',b.dataset.go===name));
+  $$('#rail .rdot').forEach(b=>b.classList.toggle('act',b.dataset.go===name));
+  $$('.clabel').forEach(l=>l.classList.toggle('on',l.dataset.region===name));
+}
+function syncTourFromCam(){
+  let best=0,bd=Infinity;
+  TOUR.forEach((n,i)=>{const v=VIEWS[n];const d=(v.x-tcam.x)**2+(v.y-tcam.y)**2;if(d<bd){bd=d;best=i;}});
+  tourIdx=best;
+}
+function stepTour(dir){
+  const ni=clamp(tourIdx+dir,0,TOUR.length-1);
+  if(ni===tourIdx){rail.classList.remove('bump');void rail.offsetWidth;rail.classList.add('bump');return;}
+  tourIdx=ni;
+  document.body.classList.add('toured');
+  go(TOUR[ni]);
+}
+
+let NODES=[];
+function buildNodes(){
+  NODES=[...$$('.node')].map(el=>({
+    el, x:parseFloat(el.style.left), y:parseFloat(el.style.top),
+    w:el.offsetWidth, h:el.offsetHeight, c:el.dataset.color||'#8ba0b4'
+  }));
+}
+function fitAll(){
+  if(!NODES.length)return;
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  NODES.forEach(n=>{x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);x1=Math.max(x1,n.x+n.w);y1=Math.max(y1,n.y+n.h);});
+  const pad=160, bw=x1-x0+pad*2, bh=y1-y0+pad*2;
+  flyTo((x0+x1)/2,(y0+y1)/2, clamp(Math.min(vw/bw,vh/bh),0.28,1)*0.92, 1400);
+  syncTourFromCam(); setAct(TOUR[tourIdx]);
+}
+function focusNode(n){
+  const cx=n.x+n.w/2;
+  let cy=n.y+n.h/2, z;
+  if(isMobile()){z=clamp(Math.min((vw*0.9)/n.w,(vh*0.78)/n.h),0.5,1.7);cy+=18;}
+  else{z=clamp(Math.min(vw/(n.w*1.5),vh/(n.h*1.7)),0.85,1.5);}
+  flyTo(cx,cy,z,900,()=>addWave(cx,cy,'200,225,255'));
+  syncTourFromCam(); setAct(TOUR[tourIdx]);
+}
+
+/* ---------- VFX canvas: wires, particles, waves ---------- */
+const fx=$('#fx'), fxc=fx.getContext('2d');
+const FXDPR=Math.min(devicePixelRatio||1,1.5);
+let FW,FH;
+function fxSize(){FW=innerWidth;FH=innerHeight;fx.width=FW*FXDPR;fx.height=FH*FXDPR;fx.style.width=FW+'px';fx.style.height=FH+'px';fxc.setTransform(FXDPR,0,0,FXDPR,0,0);}
+fxSize();addEventListener('resize',fxSize);
+
+const WRAW=[
+  [[1040,690],[2400,370],'56,189,248'],[[800,950],[540,2400],'45,212,191'],
+  [[1040,800],[2400,2470],'248,113,113'],[[1040,720],[4300,2470],'245,198,106'],
+  [[2520,450],[2730,500],'56,189,248'],[[2520,450],[3315,500],'45,212,191'],
+  [[2520,450],[2595,980],'245,158,11'],[[2520,450],[3025,980],'251,113,133'],
+  [[2520,450],[3465,980],'167,139,250'],
+];
+const WIRES=WRAW.map(([a,b,c],i)=>({a,b,rgb:'rgb('+c+')',dur:2.6+(i%5)*0.55,ph:Math.random()}));
+
+const PCOL=['56,189,248','45,212,191','245,158,11','129,166,250','167,139,250'];
+const PARTS=Array.from({length:100},()=>({
+  x:Math.random()*2000,y:Math.random()*1400,
+  d:0.2+Math.random()*0.6, r:0.7+Math.random()*2.1,
+  rgb:'rgb('+PCOL[Math.random()*PCOL.length|0]+')',
+  a:0.12+Math.random()*0.32,
+  vx:(Math.random()-.5)*0.22, vy:(Math.random()-.5)*0.22, tw:Math.random()*6.28
+}));
+const waves=[];
+function addWave(wx,wy,c){waves.push({wx,wy,c,t:0});}
+let pcx=cam.x,pcy=cam.y;
+
+function drawWires(now){
+  const t=now/1000, m=60;
+  fxc.setLineDash([5,13]);
+  fxc.lineDashOffset=-(now/55)%18;
+  fxc.lineWidth=1.5;
+  for(const w of WIRES){
+    const ax=(w.a[0]-cam.x)*zoom+FW/2, ay=(w.a[1]-cam.y)*zoom+FH/2;
+    const bx=(w.b[0]-cam.x)*zoom+FW/2, by=(w.b[1]-cam.y)*zoom+FH/2;
+    const minX=Math.min(ax,bx),maxX=Math.max(ax,bx),minY=Math.min(ay,by),maxY=Math.max(ay,by);
+    if(maxX<-m||minX>FW+m||maxY<-m||minY>FH+m)continue;
+    fxc.strokeStyle=w.rgb;fxc.fillStyle=w.rgb;
+    fxc.globalAlpha=.38;
+    fxc.beginPath();fxc.moveTo(ax,ay);fxc.lineTo(bx,by);fxc.stroke();
+    fxc.globalAlpha=.65;
+    fxc.beginPath();fxc.arc(ax,ay,3,0,6.283);fxc.arc(bx,by,3,0,6.283);fxc.fill();
+    const p=((t/w.dur)+w.ph)%1;
+    fxc.globalAlpha=.9;
+    fxc.beginPath();fxc.arc(ax+(bx-ax)*p,ay+(by-ay)*p,3,0,6.283);fxc.fill();
+  }
+  fxc.setLineDash([]);
+}
+function drawFX(now){
+  fxc.clearRect(0,0,FW,FH);
+  const cvx=cam.x-pcx, cvy=cam.y-pcy; pcx=cam.x;pcy=cam.y;
+  fxc.globalCompositeOperation='lighter';
+  drawWires(now);
+  for(const p of PARTS){
+    p.x+=p.vx;p.y+=p.vy;p.tw+=0.025;
+    let sx=p.x-cam.x*p.d*0.35, sy=p.y-cam.y*p.d*0.35;
+    sx=((sx%FW)+FW)%FW; sy=((sy%FH)+FH)%FH;
+    const twk=0.6+0.4*Math.sin(p.tw);
+    const dx=-cvx*p.d*0.35, dy=-cvy*p.d*0.35;
+    fxc.globalAlpha=p.a*twk;
+    fxc.fillStyle=p.rgb;
+    if(Math.hypot(dx,dy)>3){
+      fxc.strokeStyle=p.rgb;fxc.lineWidth=p.r;
+      fxc.beginPath();fxc.moveTo(sx-dx*0.6,sy-dy*0.6);fxc.lineTo(sx,sy);fxc.stroke();
+    } else {
+      fxc.beginPath();fxc.arc(sx,sy,p.r*(0.8+zoom*0.22),0,6.283);fxc.fill();
+    }
+  }
+  for(let i=waves.length-1;i>=0;i--){
+    const w=waves[i];w.t+=0.016;
+    if(w.t>=1){waves.splice(i,1);continue;}
+    const e=1-Math.pow(1-w.t,3);
+    const sx=(w.wx-cam.x)*zoom+FW/2, sy=(w.wy-cam.y)*zoom+FH/2;
+    fxc.strokeStyle=`rgba(${w.c},${(0.5*(1-w.t)).toFixed(3)})`;
+    fxc.lineWidth=2;
+    fxc.beginPath();fxc.arc(sx,sy,e*380*zoom+10,0,6.283);fxc.stroke();
+  }
+  fxc.globalCompositeOperation='source-over';
+  fxc.globalAlpha=1;
+}
+
+/* ---------- cursor glow (transform-only, no blend mode) ---------- */
+let mgx=-999,mgy=-999,cgx=-999,cgy=-999;
+if(!coarse)addEventListener('mousemove',e=>{mgx=e.clientX;mgy=e.clientY;},{passive:true});
+else cglow.style.display='none';
+function updGlow(){
+  if(coarse)return;
+  cgx+=(mgx-cgx)*0.14;cgy+=(mgy-cgy)*0.14;
+  cglow.style.transform=`translate3d(${(cgx-170).toFixed(1)}px,${(cgy-170).toFixed(1)}px,0)`;
+}
+
+/* ---------- wheel ---------- */
+let wheelAcc=0,wheelLock=false,accT=null;
+vp.addEventListener('wheel',e=>{
+  e.preventDefault();
+  if(e.ctrlKey||e.metaKey){zoomAt(e.clientX,e.clientY,tzoom*Math.exp(-e.deltaY*0.008));return;}
+  if(wheelLock)return;
+  const d=Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX;
+  wheelAcc+=d;
+  clearTimeout(accT);accT=setTimeout(()=>wheelAcc=0,200);
+  if(Math.abs(wheelAcc)>70){
+    wheelAcc=0;wheelLock=true;
+    setTimeout(()=>wheelLock=false,900);
+    stepTour(d>0?1:-1);
+  }
+},{passive:false});
+
+/* ---------- pointer ---------- */
+const pts=new Map();
+let dragging=false,moved=0,lx=0,ly=0,pinchD=null;
+vp.addEventListener('pointerdown',e=>{
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  vp.setPointerCapture(e.pointerId);
+  if(pts.size===1){dragging=true;moved=0;lx=e.clientX;ly=e.clientY;document.body.classList.add('dragging');}
+});
+vp.addEventListener('pointermove',e=>{
+  if(!pts.has(e.pointerId))return;
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size>=2){
+    const [a,b]=[...pts.values()];
+    const d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    if(pinchD)zoomAt(mx,my,tzoom*d/pinchD);
+    pinchD=d;dragging=false;return;
+  }
+  if(dragging){
+    const dx=e.clientX-lx,dy=e.clientY-ly;
+    moved+=Math.abs(dx)+Math.abs(dy);
+    tw=null;
+    cam.x-=dx/tzoom;cam.y-=dy/tzoom;tcam.x=cam.x;tcam.y=cam.y;
+    lx=e.clientX;ly=e.clientY;
+  }
+});
+function endPtr(e){
+  pts.delete(e.pointerId);
+  if(pts.size<2)pinchD=null;
+  if(dragging && moved<7 && pts.size===0){
+    if(!e.target.closest('a,button')){
+      const nd=e.target.closest('.node');
+      if(nd){const n=NODES.find(o=>o.el===nd);if(n)focusNode(n);}
+      else{const wx=cam.x+(e.clientX-vw/2)/zoom,wy=cam.y+(e.clientY-vh/2)/zoom;addWave(wx,wy,'140,170,200');}
+    }
+  }
+  if(dragging && moved>=7 && pts.size===0){syncTourFromCam();setAct(TOUR[tourIdx]);}
+  if(pts.size===0){dragging=false;document.body.classList.remove('dragging');}
+}
+vp.addEventListener('pointerup',endPtr);
+vp.addEventListener('pointercancel',endPtr);
+vp.addEventListener('dblclick',e=>{
+  if(e.target.closest('a,button'))return;
+  zoomAt(e.clientX,e.clientY,tzoom*1.6);
+});
+
+/* ---------- keyboard ---------- */
+addEventListener('keydown',e=>{
+  const map={'1':'home','2':'projects','3':'stack','4':'security','5':'contact'};
+  if(map[e.key])go(map[e.key]);
+  else if(e.key==='0')fitAll();
+  else if(e.key==='Escape')go('home');
+  else if(e.key==='+'||e.key==='=')zoomAt(vw/2,vh/2,tzoom*1.25);
+  else if(e.key==='-'||e.key==='_')zoomAt(vw/2,vh/2,tzoom*0.8);
+  else if(e.key.startsWith('Arrow')){
+    const s=140/tzoom;
+    if(e.key==='ArrowLeft')tcam.x-=s;if(e.key==='ArrowRight')tcam.x+=s;
+    if(e.key==='ArrowUp')tcam.y-=s;if(e.key==='ArrowDown')tcam.y+=s;
+    tw=null;syncTourFromCam();setAct(TOUR[tourIdx]);
+  }
+});
+
+/* ---------- buttons ---------- */
+$$('#dock button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+$$('#mnav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+$$('#rail .rdot').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+$$('.hub-nav button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+$('#zin').addEventListener('click',()=>zoomAt(vw/2,vh/2,tzoom*1.25));
+$('#zout').addEventListener('click',()=>zoomAt(vw/2,vh/2,tzoom*0.8));
+$('#mzin').addEventListener('click',()=>zoomAt(vw/2,vh/2,tzoom*1.3));
+$('#mzout').addEventListener('click',()=>zoomAt(vw/2,vh/2,tzoom*0.77));
+$('#fit').addEventListener('click',fitAll);
+$('#home').addEventListener('click',()=>go('home'));
+
+/* ---------- coach ---------- */
+function hideCoach(){coach.style.display='none';}
+$('#coachok').addEventListener('click',hideCoach);
+coach.addEventListener('click',e=>{if(e.target===coach)hideCoach();});
+
+/* ---------- main loop ---------- */
+const rx=$('#rx'),ry=$('#ry'),rz=$('#rz');
+let lz=-1,lrx=-1,lry=-1,lastFx=0;
+function frame(now){
+  if(tw){
+    const p=clamp((now-tw.t0)/tw.dur,0,1);
+    const e=easeInOutQuint(p);
+    cam.x=tw.from.x+(tw.to.x-tw.from.x)*e;
+    cam.y=tw.from.y+(tw.to.y-tw.from.y)*e;
+    zoom=tw.from.z+(tw.to.z-tw.from.z)*e;
+    if(p>=1){const d=tw.onDone;tw=null;d&&d();}
+  } else {
+    cam.x+=(tcam.x-cam.x)*0.16;cam.y+=(tcam.y-cam.y)*0.16;zoom+=(tzoom-zoom)*0.16;
+  }
+  apply();
+  if(Math.abs(zoom-lz)>0.002){rz.textContent=Math.round(zoom*100)+'%';lz=zoom;}
+  const irx=Math.round(cam.x),iry=Math.round(cam.y);
+  if(irx!==lrx){rx.textContent=irx;lrx=irx;}
+  if(iry!==lry){ry.textContent=iry;lry=iry;}
+  if(now-lastFx>=16){drawFX(now);lastFx=now;}   /* cap VFX to ~60fps */
+  updGlow();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- wireframe engine (no shadowBlur) ---------- */
+const wc=$('#world3d');
+let wrun=false;
+function initWorld(){
+  if(!wc)return;
+  const wctx=wc.getContext('2d');let WW,WH;
+  function wsize(){const r=wc.parentElement.getBoundingClientRect();WW=r.width;WH=r.height;wc.width=WW*DPR;wc.height=WH*DPR;wctx.setTransform(DPR,0,0,DPR,0,0);}
+  wsize();addEventListener('resize',wsize);
+  const g=(1+Math.sqrt(5))/2;
+  const V=[[-1,g,0],[1,g,0],[-1,-g,0],[1,-g,0],[0,-1,g],[0,1,g],[0,-1,-g],[0,1,-g],[g,0,-1],[g,0,1],[-g,0,-1],[-g,0,1]]
+    .map(v=>{const l=Math.hypot(v[0],v[1],v[2]);return[v[0]/l,v[1]/l,v[2]/l];});
+  const F=[[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],[1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],[3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],[4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
+  const es=new Set();F.forEach(f=>{for(let i=0;i<3;i++){const a=f[i],b=f[(i+1)%3];es.add(a<b?a+'-'+b:b+'-'+a);}});
+  const E=[...es].map(x=>x.split('-').map(Number));
+  let ang=0.6;
+  function P(x,y,z){const f=Math.min(WW,WH)*0.42,d=3.6/(3.6-z);return[WW/2+x*f*d,WH/2-y*f*d+8];}
+  function strokeEdges(R,width,color){
+    wctx.lineWidth=width;wctx.strokeStyle=color;
+    wctx.beginPath();E.forEach(([a,b])=>{wctx.moveTo(R[a][0],R[a][1]);wctx.lineTo(R[b][0],R[b][1]);});wctx.stroke();
+  }
+  function draw(){
+    wctx.clearRect(0,0,WW,WH);
+    wctx.strokeStyle='rgba(56,189,248,.13)';wctx.lineWidth=1;
+    for(let i=-3;i<=3;i++){
+      let a=P(i*0.55,-1.35,-1.65),b=P(i*0.55,-1.35,1.65);
+      wctx.beginPath();wctx.moveTo(a[0],a[1]);wctx.lineTo(b[0],b[1]);wctx.stroke();
+      a=P(-1.65,-1.35,i*0.55);b=P(1.65,-1.35,i*0.55);
+      wctx.beginPath();wctx.moveTo(a[0],a[1]);wctx.lineTo(b[0],b[1]);wctx.stroke();
+    }
+    const ca=Math.cos(ang),sa=Math.sin(ang),cb=Math.cos(ang*.55),sb=Math.sin(ang*.55);
+    const R=V.map(([x,y,z])=>{const X=x*ca-z*sa,Z1=x*sa+z*ca,Y=y*cb-Z1*sb,Z2=y*sb+Z1*cb;return P(X*1.15,Y*1.15,Z2*1.15);});
+    strokeEdges(R,4,'rgba(56,189,248,.18)');   /* wide soft pass = glow */
+    strokeEdges(R,1.3,'rgba(120,215,255,.95)');/* crisp pass */
+    wctx.fillStyle='#cfeaff';
+    R.forEach(p=>{wctx.beginPath();wctx.arc(p[0],p[1],2,0,6.283);wctx.fill();});
+    ang+=0.007;
+    if(wrun&&!reduced)requestAnimationFrame(draw);
+  }
+  new IntersectionObserver(es=>{
+    const vis=es[0].isIntersecting;
+    if(vis&&!wrun){wrun=true;draw();}
+    else if(!vis)wrun=false;
+  },{threshold:.05}).observe(wc);
+  if(reduced)draw();
+}
+
+/* ---------- copy email ---------- */
+const cb=$('#copymail');
+cb.addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText('hello@manikmagar.dev');cb.textContent='COPIED ✓';}
+  catch(e){cb.textContent='FAILED';}
+  setTimeout(()=>cb.textContent='COPY',1600);
+});
+
+/* ---------- boot ---------- */
+addEventListener('resize',()=>{vw=innerWidth;vh=innerHeight;buildNodes();});
+function boot(){
+  vw=innerWidth;vh=innerHeight;
+  buildNodes();
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  NODES.forEach(n=>{x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);x1=Math.max(x1,n.x+n.w);y1=Math.max(y1,n.y+n.h);});
+  const pad=160;
+  cam.x=(x0+x1)/2;cam.y=(y0+y1)/2;
+  zoom=clamp(Math.min(vw/(x1-x0+pad*2),vh/(y1-y0+pad*2)),0.15,1)*0.5;
+  tcam.x=cam.x;tcam.y=cam.y;tzoom=zoom;
+  apply();
+  initWorld();
+  requestAnimationFrame(frame);
+  if(isMobile())coach.style.display='grid';
+  setTimeout(()=>go('home'),isMobile()?520:450);
+  setTimeout(buildNodes,700);
+}
+if(document.readyState==='complete')boot();
+else addEventListener('load',boot);
+</script>
+</body>
+</html>
