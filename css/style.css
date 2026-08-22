@@ -87,7 +87,7 @@ html.touch #rotate{display:flex}
 /* ---- EXHIBIT OVERLAY ---- */
 #overlay{position:fixed;inset:0;z-index:50}
 .ovl-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.ovl-card{position:absolute;inset:20px;max-width:640px;max-height:82vh;margin:auto;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 30px 100px rgba(0,0,0,.65);transform:translateY(28px) scale(.95);opacity:0;filter:blur(8px);transition:transform .5s var(--ease),opacity .5s,filter .5s;position:relative}
+.ovl-card{position:absolute;inset:20px;max-width:640px;max-height:82vh;margin:auto;display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 30px 100px rgba(0,0,0,.65);transform:translateY(28px) scale(.95);opacity:0;filter:blur(8px);transition:transform .5s var(--ease),opacity .5s,filter .5s}
 #overlay:not(.hidden) .ovl-card{transform:none;opacity:1;filter:blur(0)}
 .ovl-glow{position:absolute;top:-60px;left:0;right:0;height:160px;pointer-events:none;background:radial-gradient(70% 100% at 50% 0%,var(--accent-soft),transparent 75%)}
 .ovl-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px 24px;border-bottom:1px solid var(--border);position:relative;z-index:1}
@@ -121,6 +121,7 @@ html.touch #rotate{display:flex}
 .b-link{display:block;color:inherit;text-decoration:none}
 .b-link:hover .b-item-title{color:var(--accent)}
 .b-cta{display:flex;flex-direction:column;justify-content:center}
+.b-cta-text{text-align:center}
 
 /* bento content */
 .ovl-tags{display:flex;flex-wrap:wrap;gap:7px}
@@ -177,3 +178,25 @@ html.touch #rotate{display:flex}
 
 /* ---- ANIMATIONS ---- */
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* ---- FOCUS STATES ---- */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.btn:focus-visible{outline-offset:3px}
+
+/* ---- NOSCRIPT FALLBACK ---- */
+.ns-wrap{max-width:720px;margin:0 auto;padding:40px 24px}
+.ns-wrap h1{font-size:2.2rem;font-weight:900;margin-bottom:4px}
+.ns-wrap .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ns-wrap .role{font-size:.9rem;color:var(--text-dim);margin-bottom:32px}
+.ns-wrap h2{font-size:1.3rem;font-weight:700;margin:28px 0 12px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.ns-wrap p,.ns-wrap li{font-size:.9rem;color:var(--text-dim);line-height:1.7}
+.ns-wrap ul{list-style:none;padding:0}
+.ns-wrap li{padding:4px 0}
+.ns-wrap li::before{content:'\2192 ';color:var(--accent)}
+.ns-wrap a{color:var(--accent);text-decoration:none}
+.ns-wrap a:hover{text-decoration:underline}
+.ns-wrap .contact{margin-top:32px;padding:20px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+.ns-wrap .skills{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.ns-wrap .skills span{padding:4px 12px;font-size:.75rem;font-weight:600;border-radius:20px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-soft)}
+.ns-wrap .ns-status{font-family:var(--mono);font-size:.65rem;color:var(--text-mute);letter-spacing:.06em;margin-top:16px}
+@media(max-width:700px){.ns-wrap{padding:24px 16px}.ns-wrap h1{font-size:1.8rem}.ns-wrap h2{font-size:1.1rem}}

@@ -163,13 +163,13 @@
           <div class="b-kicker">WELCOME</div>
           <h3 class="b-title">Manik <span class="g">Magar</span></h3>
           <div class="b-sub">Full-Stack Developer · MERN · Cybersecurity</div>
-          <p class="b-desc">A developer with a security mindset. I build complete web applications with robust backends and polished frontends — always with security woven into every layer.</p>
+          <p class="b-desc">A developer with a security mindset. I build complete web applications with robust backends and polished frontends, always with security woven into every layer.</p>
         </div>
         <div class="b-card b-2 b-flag">
           <span class="b-emoji">📍</span>
           <div class="b-kicker">BASED IN</div>
           <div class="b-big">Kathmandu, Nepal</div>
-          <p class="b-desc">Final-year BSc Cybersecurity at Herald College Kathmandu — degree awarded by the University of Wolverhampton.</p>
+          <p class="b-desc">Final-year BSc Cybersecurity at Herald College Kathmandu, degree awarded by the University of Wolverhampton.</p>
         </div>
         <div class="b-card b-6">
           <div class="b-kicker">FOCUS AREAS</div>
@@ -185,7 +185,7 @@
           <span class="b-num">02</span>
           <div class="b-kicker">THE STORY</div>
           <h3 class="b-title">About <span class="g">Me</span></h3>
-          <p class="b-desc">Full-stack MERN developer and final-year BSc Cybersecurity student. I build products that work flawlessly and stay secure — spending years mastering the MERN stack while diving deep into network defense, ethical hacking, and secure coding.</p>
+          <p class="b-desc">Full-stack MERN developer and final-year BSc Cybersecurity student. I build products that work flawlessly and stay secure, spending years mastering the MERN stack while diving deep into network defense, ethical hacking, and secure coding.</p>
         </div>
         <div class="b-card b-2">
           <span class="b-emoji">📍</span>
@@ -324,13 +324,13 @@
         </div>
         <div class="b-card b-2 b-flag">
           <img class="uni-logo" src="assets/img/herald-logo.svg" alt="Herald College Kathmandu" />
-          <div class="b-kicker">2023 — PRESENT · KATHMANDU</div>
+          <div class="b-kicker">2023 - PRESENT · KATHMANDU</div>
           <h4 class="b-item-title">Herald College Kathmandu</h4>
           <p class="b-desc">Studying the WLV programme at the Kathmandu campus, Nepal.</p>
         </div>
         <div class="b-card b-4">
           <span class="b-emoji">💻</span>
-          <div class="b-kicker">2021 — 2023</div>
+          <div class="b-kicker">2021 - 2023</div>
           <h4 class="b-item-title">Self-Taught Full-Stack Development</h4>
           <p class="b-desc">Independent MERN: REST APIs, authentication, real-time features, deployments.</p>
         </div>
@@ -338,7 +338,7 @@
           <span class="b-emoji">📜</span>
           <div class="b-kicker">CERTIFICATIONS</div>
           <h4 class="b-item-title">Security Certifications & Labs</h4>
-          <p class="b-desc">CompTIA Security+ (in progress) · TryHackMe · HackTheBox · OWASP Top-10.</p>
+          <p class="b-desc">Certified LLM Security Expert (CLLMSE) · CompTIA Security+ (in progress) · TryHackMe · HackTheBox.</p>
         </div>
       </div>`,
       screenLogos: [[
@@ -375,7 +375,7 @@
           <div class="ovl-tags b-mt"><span>Browser Ext</span><span>JavaScript</span></div>
         </div>
         <div class="b-card b-6 b-cta">
-          <p class="b-desc" style="text-align:center">Understanding how attacks work is the first step to building robust defenses.</p>
+          <p class="b-desc b-cta-text">Understanding how attacks work is the first step to building robust defenses.</p>
         </div>
       </div>`,
       screenBadge: 'security'
@@ -388,22 +388,22 @@
           <span class="b-num">07</span>
           <div class="b-kicker">REACH OUT</div>
           <h3 class="b-title">Let's <span class="g">Connect</span></h3>
-          <p class="b-desc">Actively looking for internships, freelance projects, and collaborations. Building something interesting — or need a developer with a security mindset? Let's talk.</p>
+          <p class="b-desc">Actively looking for internships, freelance projects, and collaborations. Building something interesting, or need a developer with a security mindset? Let's talk.</p>
         </div>
-        <a class="b-card b-2 b-link" href="mailto:manik.magar.dev@gmail.com">
+        <a class="b-card b-2 b-link" href="mailto:contact@manikmagar.com.np">
           <span class="b-emoji">✉</span>
           <div class="b-kicker">EMAIL</div>
-          <h4 class="b-item-title">manik.magar.dev@gmail.com</h4>
+          <h4 class="b-item-title">contact@manikmagar.com.np</h4>
         </a>
-        <a class="b-card b-2 b-link" href="https://github.com/manikmagar" target="_blank" rel="noopener">
+        <a class="b-card b-2 b-link" href="https://github.com/manikmagarsir" target="_blank" rel="noopener">
           <span class="b-emoji">⌂</span>
           <div class="b-kicker">GITHUB</div>
-          <h4 class="b-item-title">github.com/manikmagar</h4>
+          <h4 class="b-item-title">github.com/manikmagarsir</h4>
         </a>
-        <a class="b-card b-2 b-link" href="https://linkedin.com/in/manikmagar" target="_blank" rel="noopener">
+        <a class="b-card b-2 b-link" href="https://www.linkedin.com/in/manik-magar-b48287374/" target="_blank" rel="noopener">
           <span class="b-emoji">◉</span>
           <div class="b-kicker">LINKEDIN</div>
-          <h4 class="b-item-title">linkedin.com/in/manikmagar</h4>
+          <h4 class="b-item-title">linkedin.com/in/manik-magar</h4>
         </a>
         <div class="b-card b-6 b-flag b-cta">
           <span class="b-emoji">📍</span>

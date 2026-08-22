@@ -1,0 +1,53 @@
+# Manik Magar - Full-Stack Developer Portfolio
+
+> 3D Spatial Gallery Portfolio showcasing projects, skills, and experience of Manik Magar, a Full-Stack Developer (MERN) and Cybersecurity student based in Kathmandu, Nepal.
+
+## About
+
+Manik Magar is a Full-Stack Developer specializing in the MERN stack (MongoDB, Express, React, Node.js) with a focus on cybersecurity. Currently completing a BSc in Cybersecurity at Herald College Kathmandu, with the degree awarded by the University of Wolverhampton (UK).
+
+## Skills
+
+- **Frontend**: React, JavaScript, TypeScript, Three.js, HTML5, CSS3
+- **Backend**: Node.js, Express, MongoDB, MySQL, PHP, Python
+- **Security**: Linux/Kali, Network Security, Docker, Git, Burp Suite
+- **Certifications**: Certified LLM Security Expert (CLLMSE), CompTIA Security+ (in progress)
+
+## Projects
+
+- **Hostel Management System** - Full-stack web application (HTML5, CSS3, JavaScript, Node.js)
+- **Rack Management System** - MERN stack data-center inventory with asset tracking
+- **Visitor Management System** - Digital check-in/out system (HTML5, CSS3, JavaScript, PHP)
+- **Movie Database** - Searchable catalog with SQL queries (PHP, MySQL)
+- **OpenWord 3D** - Multiplayer 3D word game (MERN + Three.js)
+
+## Site Structure
+
+This is a single-page 3D gallery portfolio. The site uses Three.js for an interactive 3D experience where visitors walk through a virtual gallery to view exhibits about the developer's work.
+
+Key content sections (accessible via the 3D gallery):
+1. Welcome - Overview and focus areas
+2. About Me - Background and story
+3. Skills - Technical skill categories
+4. Projects - Featured project showcase
+5. Education - Academic background and certifications
+6. Security Research - Ethical lab work and POCs
+7. Connect - Contact information and social links
+
+## Contact
+
+- **Email**: contact@manikmagar.com.np
+- **GitHub**: https://github.com/manikmagarsir
+- **LinkedIn**: https://www.linkedin.com/in/manik-magar-b48287374/
+
+## Education
+
+- **University of Wolverhampton** - BSc (Hons) Cybersecurity (degree awarding body)
+- **Herald College Kathmandu** - 2023 to present
+
+## Notes
+
+- The site requires JavaScript for the 3D gallery experience
+- A noscript fallback provides full content for non-JS users and crawlers
+- Built with Three.js r128 for 3D rendering
+- Hosted on GitHub Pages at manikmagar.com.np
